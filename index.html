@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>כרטיסיות אמירנט</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 20px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    #app { width: 100%; max-width: 480px; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 22px; font-weight: 700; }
+
+    .icon-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 16px;
+      padding: 6px 10px;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+    .icon-btn:hover { background: #334155; }
+
+    .level-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .level-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #94a3b8;
+      transition: all 0.15s;
+    }
+    .level-btn.active-all  { background: #6366f1; color: #fff; border-color: transparent; }
+    .level-btn.active-1    { background: #22c55e; color: #fff; border-color: transparent; }
+    .level-btn.active-2    { background: #f59e0b; color: #fff; border-color: transparent; }
+    .level-btn.active-3    { background: #ef4444; color: #fff; border-color: transparent; }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 36px 28px;
+      text-align: center;
+      margin-bottom: 20px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      user-select: none;
+    }
+    .card:hover { border-color: #475569; }
+    .card.known  { border-color: #22c55e; box-shadow: 0 0 20px #22c55e33; }
+    .card.unknown { border-color: #ef4444; box-shadow: 0 0 20px #ef444433; }
+
+    .level-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-1 { background: #22c55e22; color: #22c55e; }
+    .badge-2 { background: #f59e0b22; color: #f59e0b; }
+    .badge-3 { background: #ef444422; color: #ef4444; }
+
+    .card-word {
+      font-size: 36px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+      direction: ltr;
+    }
+    .card-translation { font-size: 22px; color: #60a5fa; font-weight: 600; }
+    .card-hint        { font-size: 14px; color: #475569; font-style: italic; }
+    .card-status      { margin-top: 12px; font-size: 13px; }
+    .card-status.known   { color: #22c55e; }
+    .card-status.unknown { color: #ef4444; }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 12px 0;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-unknown { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
+    .btn-unknown:hover { background: #ef444433; }
+    .btn-known   { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
+    .btn-known:hover   { background: #22c55e33; }
+
+    .nav-btns { display: flex; gap: 8px; }
+    .nav-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-size: 18px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: #334155; }
+
+    .kb-hint { text-align: center; color: #475569; font-size: 12px; }
+
+    .review-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: #ef444415;
+      border: 1px solid #ef444444;
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+    .review-banner.visible { display: flex; }
+    .review-banner span { font-size: 13px; color: #ef4444; font-weight: 600; }
+    .review-btn {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .review-btn:hover { background: #dc2626; }
+    .review-mode-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: #ef444422;
+      border: 1px solid #ef4444;
+      border-radius: 12px;
+      padding: 8px 16px;
+      margin-bottom: 12px;
+    }
+    .review-mode-bar.visible { display: flex; }
+    .review-mode-bar span { font-size: 13px; color: #ef4444; font-weight: 700; }
+    .exit-review-btn {
+      background: transparent;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .exit-review-btn:hover { background: #334155; }
+
+    /* Stats screen */
+    #stats-screen { display: none; }
+    #stats-screen.visible { display: block; }
+    #main-screen.hidden { display: none; }
+
+    .back-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 14px;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+    .stat-box {
+      flex: 1;
+      background: #1e293b;
+      border: 2px solid;
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .stat-num { font-size: 32px; font-weight: 700; }
+    .stat-label { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+    .stat-green { border-color: #22c55e; }
+    .stat-green .stat-num { color: #22c55e; }
+    .stat-red   { border-color: #ef4444; }
+    .stat-red   .stat-num { color: #ef4444; }
+    .stat-blue  { border-color: #60a5fa; }
+    .stat-blue  .stat-num { color: #60a5fa; }
+
+    .word-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .word-chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+    .word-chip .en { color: #e2e8f0; }
+    .word-chip .he { color: #94a3b8; font-size: 11px; }
+    .section-title { font-size: 15px; font-weight: 700; margin: 0 0 12px 0; }
+    .section-title.red   { color: #ef4444; }
+    .section-title.green { color: #22c55e; }
+    .section { margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Main screen -->
+  <div id="main-screen">
+    <div class="header">
+      <h1>🎓 כרטיסיות אמירנט</h1>
+      <div>
+        <button class="icon-btn" onclick="shuffleCards()" title="ערבב">🔀</button>
+        <button class="icon-btn" onclick="resetProgress()" title="אפס התקדמות">↺</button>
+        <button class="icon-btn" onclick="showStats()" title="סטטיסטיקות">📊</button>
+      </div>
+    </div>
+
+    <div class="level-row">
+      <button class="level-btn active-all" onclick="setLevel(0)" id="btn-level-0">הכל</button>
+      <button class="level-btn" onclick="setLevel(1)" id="btn-level-1">א׳ - בסיסי</button>
+      <button class="level-btn" onclick="setLevel(2)" id="btn-level-2">ב׳ - בינוני</button>
+      <button class="level-btn" onclick="setLevel(3)" id="btn-level-3">ג׳ - מתקדם</button>
+    </div>
+
+    <div class="review-banner" id="review-banner">
+      <span id="review-banner-text">יש מילים שלא ידעת</span>
+      <button class="review-btn" onclick="startReviewMode()">🔁 חזור עליהן</button>
+    </div>
+
+    <div class="review-mode-bar" id="review-mode-bar">
+      <span>🔁 מצב חזרה — מילים שלא ידעת</span>
+      <button class="exit-review-btn" onclick="exitReviewMode()">← חזור לכולן</button>
+    </div>
+
+    <div class="progress-info">
+      <span id="card-counter">כרטיס 1 מתוך 0</span>
+      <span id="known-counter">0 ידועות (0%)</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="card" id="card" onclick="flipCard()">
+      <div class="level-badge badge-1" id="level-badge">א׳ - בסיסי</div>
+      <div class="card-word" id="card-word">...</div>
+      <div class="card-hint" id="card-hint">לחץ לגלות תרגום</div>
+      <div class="card-translation" id="card-translation" style="display:none"></div>
+      <div class="card-status" id="card-status"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="action-btn btn-unknown" onclick="markUnknown()">✗ לא יודע</button>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="go(-1)">←</button>
+        <button class="nav-btn" onclick="go(1)">→</button>
+      </div>
+      <button class="action-btn btn-known" onclick="markKnown()">✓ יודע!</button>
+    </div>
+    <div class="kb-hint">← → לניווט · Space להפוך · ↑ יודע · ↓ לא יודע</div>
+  </div>
+
+  <!-- Stats screen -->
+  <div id="stats-screen">
+    <div class="header">
+      <h1>📊 סטטיסטיקות</h1>
+      <button class="back-btn" onclick="hideStats()">← חזור</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box stat-green">
+        <div class="stat-num" id="stat-known">0</div>
+        <div class="stat-label">ידועות</div>
+      </div>
+      <div class="stat-box stat-red">
+        <div class="stat-num" id="stat-unknown">0</div>
+        <div class="stat-label">לחזרה</div>
+      </div>
+      <div class="stat-box stat-blue">
+        <div class="stat-num" id="stat-unseen">0</div>
+        <div class="stat-label">לא נבדקו</div>
+      </div>
+    </div>
+    <div id="unknown-section" class="section"></div>
+    <div id="known-section" class="section"></div>
+  </div>
+
+</div>
+
+<script>
+const WORDS = [
+  // רמה א - בסיסי
+  { en: "analyze",     he: "לנתח",                  level: 1 },
+  { en: "approach",    he: "גישה / לגשת",             level: 1 },
+  { en: "benefit",     he: "יתרון / תועלת",           level: 1 },
+  { en: "category",    he: "קטגוריה / סוג",           level: 1 },
+  { en: "cause",       he: "סיבה / לגרום",            level: 1 },
+  { en: "concept",     he: "מושג / רעיון",            level: 1 },
+  { en: "conclude",    he: "להסיק / לסיים",           level: 1 },
+  { en: "context",     he: "הקשר / רקע",              level: 1 },
+  { en: "define",      he: "להגדיר",                  level: 1 },
+  { en: "describe",    he: "לתאר",                    level: 1 },
+  { en: "determine",   he: "לקבוע / לברר",            level: 1 },
+  { en: "develop",     he: "לפתח",                    level: 1 },
+  { en: "effect",      he: "השפעה / תוצאה",           level: 1 },
+  { en: "establish",   he: "לבסס / להקים",            level: 1 },
+  { en: "evidence",    he: "ראיה / עדות",              level: 1 },
+  { en: "explain",     he: "להסביר",                  level: 1 },
+  { en: "fact",        he: "עובדה",                   level: 1 },
+  { en: "identify",    he: "לזהות",                   level: 1 },
+  { en: "indicate",    he: "להצביע על / לרמוז",       level: 1 },
+  { en: "influence",   he: "להשפיע / השפעה",          level: 1 },
+  { en: "involve",     he: "לכלול / לערב",            level: 1 },
+  { en: "issue",       he: "נושא / עניין",             level: 1 },
+  { en: "main",        he: "עיקרי / ראשי",             level: 1 },
+  { en: "method",      he: "שיטה / דרך",              level: 1 },
+  { en: "obtain",      he: "להשיג / לקבל",            level: 1 },
+  { en: "opinion",     he: "דעה / עמדה",              level: 1 },
+  { en: "provide",     he: "לספק / לתת",              level: 1 },
+  { en: "purpose",     he: "מטרה / כוונה",            level: 1 },
+  { en: "require",     he: "לדרוש",                   level: 1 },
+  { en: "result",      he: "תוצאה",                   level: 1 },
+  { en: "significant", he: "משמעותי / חשוב",          level: 1 },
+  { en: "suggest",     he: "להציע / לרמוז",           level: 1 },
+  { en: "support",     he: "לתמוך / תמיכה",           level: 1 },
+  { en: "theory",      he: "תיאוריה",                 level: 1 },
+  { en: "argue",       he: "לטעון / להתווכח",         level: 1 },
+  { en: "compare",     he: "להשוות",                  level: 1 },
+  { en: "consider",    he: "לשקול / לחשוב",           level: 1 },
+  { en: "increase",    he: "לגדול / להגדיל",          level: 1 },
+  { en: "decrease",    he: "לקטון / להקטין",          level: 1 },
+  { en: "important",   he: "חשוב",                    level: 1 },
+  { en: "include",     he: "לכלול",                   level: 1 },
+  { en: "information", he: "מידע",                    level: 1 },
+  { en: "problem",     he: "בעיה",                    level: 1 },
+  { en: "research",    he: "מחקר / לחקור",            level: 1 },
+  { en: "society",     he: "חברה",                    level: 1 },
+  { en: "source",      he: "מקור",                    level: 1 },
+  { en: "view",        he: "נקודת מבט / דעה",          level: 1 },
+  // רמה ב - בינוני
+  { en: "abstract",     he: "מופשט / תקציר",           level: 2 },
+  { en: "achieve",      he: "להשיג / להגיע",           level: 2 },
+  { en: "acquire",      he: "לרכוש / לקנות",           level: 2 },
+  { en: "adequate",     he: "מספיק / הולם",            level: 2 },
+  { en: "alternative",  he: "חלופה / אלטרנטיבה",      level: 2 },
+  { en: "apparent",     he: "ברור / נראה / לכאורה",   level: 2 },
+  { en: "appropriate",  he: "מתאים / הולם",            level: 2 },
+  { en: "assume",       he: "להניח / לקחת",            level: 2 },
+  { en: "available",    he: "זמין / פנוי",              level: 2 },
+  { en: "challenge",    he: "אתגר / לאתגר",            level: 2 },
+  { en: "characteristic",he: "מאפיין / תכונה",         level: 2 },
+  { en: "complex",      he: "מורכב",                   level: 2 },
+  { en: "component",    he: "מרכיב / חלק",             level: 2 },
+  { en: "comprehensive",he: "מקיף / יסודי",            level: 2 },
+  { en: "considerable", he: "ניכר / משמעותי",          level: 2 },
+  { en: "constant",     he: "קבוע / מתמיד",            level: 2 },
+  { en: "contribute",   he: "לתרום",                   level: 2 },
+  { en: "contrast",     he: "ניגוד / להתנגד",          level: 2 },
+  { en: "debate",       he: "ויכוח / דיון",             level: 2 },
+  { en: "decline",      he: "ירידה / לסרב / לדעוך",   level: 2 },
+  { en: "demonstrate",  he: "להדגים / להוכיח",         level: 2 },
+  { en: "derive",       he: "לנבוע / לגזור",           level: 2 },
+  { en: "diverse",      he: "מגוון / שונה",             level: 2 },
+  { en: "dominant",     he: "דומיננטי / שולט",         level: 2 },
+  { en: "emerge",       he: "לצוץ / לעלות",            level: 2 },
+  { en: "enhance",      he: "לשפר / להגביר",           level: 2 },
+  { en: "emphasize",    he: "להדגיש",                  level: 2 },
+  { en: "evaluate",     he: "להעריך",                  level: 2 },
+  { en: "evident",      he: "ברור / מובן",              level: 2 },
+  { en: "expand",       he: "להרחיב / להתרחב",         level: 2 },
+  { en: "facilitate",   he: "לאפשר / להקל",            level: 2 },
+  { en: "factor",       he: "גורם / פקטור",             level: 2 },
+  { en: "generate",     he: "לייצר / לגרום",           level: 2 },
+  { en: "hypothesis",   he: "השערה / היפותזה",         level: 2 },
+  { en: "impact",       he: "השפעה / להשפיע",          level: 2 },
+  { en: "implement",    he: "ליישם / להוציא לפועל",    level: 2 },
+  { en: "imply",        he: "לרמוז / לגרור",           level: 2 },
+  { en: "initial",      he: "ראשוני / התחלתי",         level: 2 },
+  { en: "instance",     he: "מקרה / דוגמה",            level: 2 },
+  { en: "interpret",    he: "לפרש / לתרגם",            level: 2 },
+  { en: "investigate",  he: "לחקור / לבדוק",           level: 2 },
+  { en: "justify",      he: "להצדיק",                  level: 2 },
+  { en: "maintain",     he: "לשמור / לטעון",           level: 2 },
+  { en: "major",        he: "עיקרי / גדול",             level: 2 },
+  { en: "modify",       he: "לשנות / לסגל",            level: 2 },
+  { en: "nevertheless", he: "עם זאת / למרות זאת",     level: 2 },
+  { en: "objective",    he: "מטרה / אובייקטיבי",       level: 2 },
+  { en: "occur",        he: "להתרחש / לקרות",          level: 2 },
+  { en: "overall",      he: "כולל / בסך הכל",          level: 2 },
+  { en: "period",       he: "תקופה / זמן",              level: 2 },
+  { en: "phenomenon",   he: "תופעה / פנומן",           level: 2 },
+  { en: "potential",    he: "פוטנציאל / אפשרי",        level: 2 },
+  { en: "primary",      he: "ראשי / ראשוני / עיקרי",   level: 2 },
+  { en: "principle",    he: "עיקרון",                  level: 2 },
+  { en: "process",      he: "תהליך / עיבוד",           level: 2 },
+  { en: "range",        he: "טווח / מגוון",             level: 2 },
+  { en: "relevant",     he: "רלוונטי / שייך",          level: 2 },
+  { en: "resolve",      he: "לפתור / להחליט",          level: 2 },
+  { en: "restrict",     he: "להגביל",                  level: 2 },
+  { en: "reveal",       he: "לחשוף / לגלות",           level: 2 },
+  { en: "role",         he: "תפקיד",                   level: 2 },
+  { en: "specific",     he: "ספציפי / מסוים",          level: 2 },
+  { en: "strategy",     he: "אסטרטגיה / תכנית",        level: 2 },
+  { en: "structure",    he: "מבנה / לבנות",            level: 2 },
+  { en: "subsequent",   he: "עוקב / לאחר מכן",        level: 2 },
+  { en: "sufficient",   he: "מספיק / די",               level: 2 },
+  { en: "trend",        he: "מגמה",                    level: 2 },
+  { en: "underlying",   he: "בסיסי / עמוק / סמוי",    level: 2 },
+  { en: "utilize",      he: "להשתמש / לנצל",           level: 2 },
+  { en: "whereas",      he: "בעוד ש / לעומת",          level: 2 },
+  { en: "thereby",      he: "בכך / על ידי כך",         level: 2 },
+  { en: "thus",         he: "לכן / כך",                level: 2 },
+  { en: "hence",        he: "לפיכך / מכאן",            level: 2 },
+  { en: "furthermore",  he: "יתר על כן / בנוסף",      level: 2 },
+  { en: "moreover",     he: "יתרה מכך / בנוסף",       level: 2 },
+  { en: "however",      he: "אולם / לעומת זאת",        level: 2 },
+  { en: "although",     he: "למרות ש / אף על פי ש",   level: 2 },
+  { en: "despite",      he: "למרות",                   level: 2 },
+  // רמה ג - מתקדם
+  { en: "accommodate",  he: "להכיל / להתאים",          level: 3 },
+  { en: "ambiguous",    he: "דו-משמעי / מעורפל",      level: 3 },
+  { en: "anticipate",   he: "לצפות / לחזות",           level: 3 },
+  { en: "arbitrary",    he: "שרירותי / אקראי",         level: 3 },
+  { en: "coherent",     he: "קוהרנטי / עקבי / מגובש", level: 3 },
+  { en: "constitute",   he: "להוות / להרכיב",          level: 3 },
+  { en: "controversy",  he: "מחלוקת / ויכוח",          level: 3 },
+  { en: "counterpart",  he: "מקביל / עמית",            level: 3 },
+  { en: "criterion",    he: "קריטריון / מדד",          level: 3 },
+  { en: "crucial",      he: "חיוני / קריטי",           level: 3 },
+  { en: "deduce",       he: "להסיק / לנכות",           level: 3 },
+  { en: "deviate",      he: "לסטות / לחרוג",           level: 3 },
+  { en: "discrepancy",  he: "פער / אי-התאמה / סתירה", level: 3 },
+  { en: "elaborate",    he: "להרחיב / מפורט",          level: 3 },
+  { en: "empirical",    he: "אמפירי / מבוסס ניסיון",  level: 3 },
+  { en: "explicit",     he: "מפורש / ברור",            level: 3 },
+  { en: "fluctuate",    he: "להשתנות / לנוע",          level: 3 },
+  { en: "fundamental",  he: "יסודי / בסיסי",           level: 3 },
+  { en: "generalize",   he: "להכליל",                  level: 3 },
+  { en: "impose",       he: "להטיל / לכפות",           level: 3 },
+  { en: "inherent",     he: "טבוע / מובנה",            level: 3 },
+  { en: "integrate",    he: "לשלב / לאחד",             level: 3 },
+  { en: "intrinsic",    he: "מהותי / פנימי",           level: 3 },
+  { en: "notion",       he: "מושג / רעיון / תפיסה",   level: 3 },
+  { en: "paradox",      he: "פרדוקס / סתירה",          level: 3 },
+  { en: "perception",   he: "תפיסה / תחושה",           level: 3 },
+  { en: "perspective",  he: "פרספקטיבה / נקודת מבט",  level: 3 },
+  { en: "preliminary",  he: "מקדים / ראשוני / מוקדם", level: 3 },
+  { en: "profound",     he: "עמוק / מעמיק / משמעותי", level: 3 },
+  { en: "rational",     he: "רציונלי / הגיוני",        level: 3 },
+  { en: "reinforce",    he: "לחזק / לתגבר",            level: 3 },
+  { en: "retain",       he: "לשמור / לזכור / להחזיק", level: 3 },
+  { en: "spontaneous",  he: "ספונטני / טבעי",          level: 3 },
+  { en: "subjective",   he: "סובייקטיבי / אישי",      level: 3 },
+  { en: "substantial",  he: "משמעותי / ניכר / גדול",  level: 3 },
+  { en: "subtle",       he: "עדין / דק / לא ברור",    level: 3 },
+  { en: "sustain",      he: "לקיים / לתמוך",           level: 3 },
+  { en: "transformation",he: "שינוי / מהפך",           level: 3 },
+  { en: "transition",   he: "מעבר / שינוי",            level: 3 },
+  { en: "validity",     he: "תקפות / תוקף",            level: 3 },
+  { en: "acknowledge",  he: "להכיר / להודות",          level: 3 },
+  { en: "advocate",     he: "לתמוך / סנגור",           level: 3 },
+  { en: "alleviate",    he: "להקל / לרכך",             level: 3 },
+  { en: "ambivalent",   he: "אמביוולנטי / דו-ערכי",  level: 3 },
+  { en: "assert",       he: "לטעון / לאשר",            level: 3 },
+  { en: "attribute",    he: "לייחס / תכונה",           level: 3 },
+  { en: "bias",         he: "דעה קדומה / הטיה",        level: 3 },
+  { en: "cognitive",    he: "קוגניטיבי / מחשבתי",     level: 3 },
+  { en: "compel",       he: "לאלץ / לכפות",            level: 3 },
+  { en: "concurrent",   he: "בו-זמני / מקביל",        level: 3 },
+  { en: "cumulative",   he: "מצטבר",                   level: 3 },
+  { en: "depict",       he: "לתאר / לצייר",            level: 3 },
+  { en: "disparity",    he: "אי-שוויון / פער",         level: 3 },
+  { en: "domain",       he: "תחום / מרחב",              level: 3 },
+  { en: "erroneous",    he: "שגוי / מוטעה",            level: 3 },
+  { en: "exclusive",    he: "בלעדי / יוקרתי",          level: 3 },
+  { en: "infer",        he: "להסיק",                   level: 3 },
+  { en: "inhibit",      he: "לעכב / למנוע",            level: 3 },
+  { en: "innovative",   he: "חדשני / מקורי",           level: 3 },
+  { en: "manifest",     he: "לבטא / ברור",             level: 3 },
+  { en: "negate",       he: "לשלול / לבטל",            level: 3 },
+  { en: "nonetheless",  he: "בכל זאת / עם זאת",       level: 3 },
+  { en: "nuance",       he: "ניואנס / דקות",           level: 3 },
+  { en: "paramount",    he: "עליון / חשוב ביותר",      level: 3 },
+  { en: "pervasive",    he: "נפוץ / מתפשט",            level: 3 },
+  { en: "plausible",    he: "סביר / מתקבל על הדעת",   level: 3 },
+  { en: "preclude",     he: "למנוע / לשלול",           level: 3 },
+  { en: "prevalent",    he: "נפוץ / שכיח",             level: 3 },
+  { en: "prone",        he: "נוטה / נטוי",              level: 3 },
+  { en: "reconcile",    he: "לפייס / ליישב",           level: 3 },
+  { en: "redundant",    he: "מיותר / עודף",            level: 3 },
+  { en: "refute",       he: "לסתור / להפריך",          level: 3 },
+  { en: "reluctant",    he: "מהסס / לא מוכן",          level: 3 },
+  { en: "rigorous",     he: "קפדני / מחמיר",           level: 3 },
+  { en: "scrutinize",   he: "לבחון / לדקדק",           level: 3 },
+  { en: "simultaneously",he: "בו-זמנית / במקביל",     level: 3 },
+  { en: "skeptical",    he: "ספקני / מפקפק",           level: 3 },
+  { en: "speculate",    he: "לשער / לנחש",             level: 3 },
+  { en: "ubiquitous",   he: "נמצא בכל מקום / נפוץ מאוד", level: 3 },
+  { en: "unprecedented",he: "חסר תקדים",               level: 3 },
+  { en: "viable",       he: "בר-ביצוע / ישים",         level: 3 },
+  { en: "volatile",     he: "נדיף / תנודתי",           level: 3 },
+];
+
+const LEVEL_LABELS = { 1: "א׳ - בסיסי", 2: "ב׳ - בינוני", 3: "ג׳ - מתקדם" };
+
+let allCards = shuffle([...WORDS]);
+let filteredCards = [...allCards];
+let currentIndex = 0;
+let isFlipped = false;
+let known = new Set();
+let unknown = new Set();
+let selectedLevel = 0;
+let reviewMode = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function applyLevelFilter() {
+  const base = selectedLevel === 0 ? allCards : allCards.filter(c => c.level === selectedLevel);
+  filteredCards = reviewMode ? base.filter(c => unknown.has(c.en)) : base;
+  currentIndex = 0;
+}
+
+function render() {
+  const card = filteredCards[currentIndex];
+  if (!card) {
+    if (reviewMode) {
+      document.getElementById('card').className = 'card';
+      document.getElementById('card-word').textContent = '🎉';
+      document.getElementById('card-hint').style.display = 'block';
+      document.getElementById('card-hint').textContent = 'סיימת את כל המילים לחזרה!';
+      document.getElementById('card-translation').style.display = 'none';
+      document.getElementById('card-status').textContent = '';
+      document.getElementById('level-badge').textContent = '';
+      document.getElementById('card-counter').textContent = 'כרטיס 0 מתוך 0';
+      document.getElementById('review-mode-bar').classList.add('visible');
+      document.getElementById('review-banner').classList.remove('visible');
+    }
+    return;
+  }
+
+  const cardEl = document.getElementById('card');
+  const status = known.has(card.en) ? 'known' : unknown.has(card.en) ? 'unknown' : 'neutral';
+
+  cardEl.className = 'card' + (status !== 'neutral' ? ' ' + status : '');
+
+  document.getElementById('level-badge').textContent = LEVEL_LABELS[card.level];
+  document.getElementById('level-badge').className = 'level-badge badge-' + card.level;
+  document.getElementById('card-word').textContent = card.en;
+
+  const hint = document.getElementById('card-hint');
+  const translation = document.getElementById('card-translation');
+  if (isFlipped) {
+    hint.style.display = 'none';
+    translation.style.display = 'block';
+    translation.textContent = card.he;
+  } else {
+    hint.style.display = 'block';
+    hint.textContent = 'לחץ לגלות תרגום';
+    translation.style.display = 'none';
+  }
+
+  const statusEl = document.getElementById('card-status');
+  if (status === 'known')   { statusEl.textContent = '✓ ידוע'; statusEl.className = 'card-status known'; }
+  else if (status === 'unknown') { statusEl.textContent = '✗ לחזרה'; statusEl.className = 'card-status unknown'; }
+  else { statusEl.textContent = ''; statusEl.className = 'card-status'; }
+
+  const total = filteredCards.length;
+  const knownCount = filteredCards.filter(c => known.has(c.en)).length;
+  const pct = total > 0 ? Math.round((knownCount / total) * 100) : 0;
+
+  document.getElementById('card-counter').textContent = `כרטיס ${currentIndex + 1} מתוך ${total}`;
+  document.getElementById('known-counter').textContent = `${knownCount} ידועות (${pct}%)`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const unknownCount = filteredCards.filter(c => unknown.has(c.en)).length;
+  const banner = document.getElementById('review-banner');
+  const modeBar = document.getElementById('review-mode-bar');
+  if (reviewMode) {
+    banner.classList.remove('visible');
+    modeBar.classList.add('visible');
+  } else {
+    modeBar.classList.remove('visible');
+    const allUnknown = (selectedLevel === 0 ? allCards : allCards.filter(c => c.level === selectedLevel))
+      .filter(c => unknown.has(c.en)).length;
+    if (allUnknown > 0) {
+      banner.classList.add('visible');
+      document.getElementById('review-banner-text').textContent = `יש ${allUnknown} מילים שלא ידעת`;
+    } else {
+      banner.classList.remove('visible');
+    }
+  }
+}
+
+function startReviewMode() {
+  reviewMode = true;
+  applyLevelFilter();
+  isFlipped = false;
+  render();
+}
+
+function exitReviewMode() {
+  reviewMode = false;
+  applyLevelFilter();
+  isFlipped = false;
+  render();
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  render();
+}
+
+function go(dir) {
+  isFlipped = false;
+  currentIndex = (currentIndex + dir + filteredCards.length) % filteredCards.length;
+  render();
+}
+
+function markKnown() {
+  const card = filteredCards[currentIndex];
+  known.add(card.en);
+  unknown.delete(card.en);
+  go(1);
+}
+
+function markUnknown() {
+  const card = filteredCards[currentIndex];
+  unknown.add(card.en);
+  known.delete(card.en);
+  go(1);
+}
+
+function shuffleCards() {
+  allCards = shuffle([...WORDS]);
+  applyLevelFilter();
+  isFlipped = false;
+  render();
+}
+
+function resetProgress() {
+  known = new Set();
+  unknown = new Set();
+  currentIndex = 0;
+  isFlipped = false;
+  render();
+}
+
+function setLevel(lvl) {
+  selectedLevel = lvl;
+  [0,1,2,3].forEach(l => {
+    const btn = document.getElementById('btn-level-' + l);
+    btn.className = 'level-btn' + (selectedLevel === l ? ' active-' + (l === 0 ? 'all' : l) : '');
+  });
+  applyLevelFilter();
+  isFlipped = false;
+  render();
+}
+
+function showStats() {
+  const total = filteredCards.length;
+  const knownWords = filteredCards.filter(c => known.has(c.en));
+  const unknownWords = filteredCards.filter(c => unknown.has(c.en));
+  const unseen = total - knownWords.length - unknownWords.length;
+
+  document.getElementById('stat-known').textContent = knownWords.length;
+  document.getElementById('stat-unknown').textContent = unknownWords.length;
+  document.getElementById('stat-unseen').textContent = unseen;
+
+  const unknownSec = document.getElementById('unknown-section');
+  if (unknownWords.length > 0) {
+    unknownSec.innerHTML = `<p class="section-title red">מילים לחזרה (${unknownWords.length})</p><div class="word-grid">${
+      unknownWords.map(w => `<div class="word-chip"><span class="en">${w.en}</span><span class="he">= ${w.he}</span></div>`).join('')
+    }</div>`;
+  } else {
+    unknownSec.innerHTML = '';
+  }
+
+  const knownSec = document.getElementById('known-section');
+  if (knownWords.length > 0) {
+    knownSec.innerHTML = `<p class="section-title green">מילים שידועות (${knownWords.length})</p><div class="word-grid">${
+      knownWords.map(w => `<div class="word-chip"><span class="en">${w.en}</span><span class="he">= ${w.he}</span></div>`).join('')
+    }</div>`;
+  } else {
+    knownSec.innerHTML = '';
+  }
+
+  document.getElementById('main-screen').classList.add('hidden');
+  document.getElementById('stats-screen').classList.add('visible');
+}
+
+function hideStats() {
+  document.getElementById('stats-screen').classList.remove('visible');
+  document.getElementById('main-screen').classList.remove('hidden');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('stats-screen').classList.contains('visible')) return;
+  if (e.key === 'ArrowRight')  go(-1);
+  else if (e.key === 'ArrowLeft') go(1);
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+  else if (e.key === 'ArrowUp') markKnown();
+  else if (e.key === 'ArrowDown') markUnknown();
+});
+
+// Init
+render();
+</script>
+</body>
+</html>
