@@ -113,14 +113,36 @@
     .badge-2 { background: #f59e0b22; color: #f59e0b; }
     .badge-3 { background: #ef444422; color: #ef4444; }
 
+    .card-word-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      direction: ltr;
+    }
     .card-word {
       font-size: 36px;
       font-weight: 700;
       color: #f1f5f9;
-      margin-bottom: 12px;
       letter-spacing: 0.5px;
-      direction: ltr;
     }
+    .speak-btn {
+      background: #1e3a5f;
+      border: 1px solid #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .speak-btn:hover { background: #1e40af; }
+    .speak-btn.speaking { background: #2563eb; animation: pulse 0.6s infinite alternate; }
+    @keyframes pulse { from { box-shadow: 0 0 0 0 #3b82f655; } to { box-shadow: 0 0 0 8px #3b82f600; } }
     .card-translation { font-size: 22px; color: #60a5fa; font-weight: 600; }
     .card-hint        { font-size: 14px; color: #475569; font-style: italic; }
     .card-status      { margin-top: 12px; font-size: 13px; }
@@ -306,7 +328,10 @@
 
     <div class="card" id="card" onclick="flipCard()">
       <div class="level-badge badge-1" id="level-badge">א׳ - בסיסי</div>
-      <div class="card-word" id="card-word">...</div>
+      <div class="card-word-row">
+        <div class="card-word" id="card-word">...</div>
+        <button class="speak-btn" id="speak-btn" onclick="speakWord(event)" title="השמע מילה">🔊</button>
+      </div>
       <div class="card-hint" id="card-hint">לחץ לגלות תרגום</div>
       <div class="card-translation" id="card-translation" style="display:none"></div>
       <div class="card-status" id="card-status"></div>
@@ -672,6 +697,21 @@ function exitReviewMode() {
   applyLevelFilter();
   isFlipped = false;
   render();
+}
+
+function speakWord(e) {
+  if (e) e.stopPropagation(); // לא להפוך את הכרטיסייה
+  const word = document.getElementById('card-word').textContent;
+  if (!word || word === '🎉') return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-US';
+  utter.rate = 0.85;
+  const btn = document.getElementById('speak-btn');
+  btn.classList.add('speaking');
+  utter.onend = () => btn.classList.remove('speaking');
+  utter.onerror = () => btn.classList.remove('speaking');
+  window.speechSynthesis.speak(utter);
 }
 
 function flipCard() {
