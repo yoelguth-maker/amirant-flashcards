@@ -64,6 +64,7 @@
       transition: all 0.15s;
     }
     .level-btn.active-all  { background: #6366f1; color: #fff; border-color: transparent; }
+    .level-btn.active-0    { background: #a855f7; color: #fff; border-color: transparent; }
     .level-btn.active-1    { background: #22c55e; color: #fff; border-color: transparent; }
     .level-btn.active-2    { background: #f59e0b; color: #fff; border-color: transparent; }
     .level-btn.active-3    { background: #ef4444; color: #fff; border-color: transparent; }
@@ -118,6 +119,7 @@
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
+    .badge-0 { background: #a855f722; color: #a855f7; }
     .badge-1 { background: #22c55e22; color: #22c55e; }
     .badge-2 { background: #f59e0b22; color: #f59e0b; }
     .badge-3 { background: #ef444422; color: #ef4444; }
@@ -329,7 +331,8 @@
     </div>
 
     <div class="level-row">
-      <button class="level-btn active-all" onclick="setLevel(0)" id="btn-level-0">הכל</button>
+      <button class="level-btn active-all" onclick="setLevel('all')" id="btn-level-all">הכל</button>
+      <button class="level-btn" onclick="setLevel(0)" id="btn-level-0">For Guy 🙄</button>
       <button class="level-btn" onclick="setLevel(1)" id="btn-level-1">א׳ - בסיסי</button>
       <button class="level-btn" onclick="setLevel(2)" id="btn-level-2">ב׳ - בינוני</button>
       <button class="level-btn" onclick="setLevel(3)" id="btn-level-3">ג׳ - מתקדם</button>
@@ -403,6 +406,134 @@
 
 <script>
 const WORDS = [
+  // ═══════════════════════════════════════════
+  // For Guy 🙄 — מילים בסיסיות מאוד → רמה 0
+  // ═══════════════════════════════════════════
+  // שמות עצם
+  { en: "house",      he: "בית",                   level: 0 },
+  { en: "car",        he: "מכונית",                 level: 0 },
+  { en: "food",       he: "אוכל",                   level: 0 },
+  { en: "water",      he: "מים",                    level: 0 },
+  { en: "money",      he: "כסף",                    level: 0 },
+  { en: "time",       he: "זמן",                    level: 0 },
+  { en: "day",        he: "יום",                    level: 0 },
+  { en: "year",       he: "שנה",                    level: 0 },
+  { en: "friend",     he: "חבר",                    level: 0 },
+  { en: "family",     he: "משפחה",                  level: 0 },
+  { en: "school",     he: "בית ספר",                level: 0 },
+  { en: "work",       he: "עבודה",                  level: 0 },
+  { en: "city",       he: "עיר",                    level: 0 },
+  { en: "street",     he: "רחוב",                   level: 0 },
+  { en: "country",    he: "מדינה / ארץ",             level: 0 },
+  { en: "man",        he: "גבר / איש",               level: 0 },
+  { en: "woman",      he: "אישה",                   level: 0 },
+  { en: "child",      he: "ילד",                    level: 0 },
+  { en: "book",       he: "ספר",                    level: 0 },
+  { en: "door",       he: "דלת",                    level: 0 },
+  { en: "window",     he: "חלון",                   level: 0 },
+  { en: "hand",       he: "יד",                     level: 0 },
+  { en: "eye",        he: "עין",                    level: 0 },
+  { en: "head",       he: "ראש",                    level: 0 },
+  { en: "word",       he: "מילה",                   level: 0 },
+  { en: "name",       he: "שם",                     level: 0 },
+  { en: "place",      he: "מקום",                   level: 0 },
+  { en: "world",      he: "עולם",                   level: 0 },
+  { en: "phone",      he: "טלפון",                  level: 0 },
+  { en: "morning",    he: "בוקר",                   level: 0 },
+  { en: "night",      he: "לילה",                   level: 0 },
+  { en: "question",   he: "שאלה",                   level: 0 },
+  { en: "answer",     he: "תשובה",                  level: 0 },
+  { en: "idea",       he: "רעיון",                  level: 0 },
+  { en: "number",     he: "מספר",                   level: 0 },
+  { en: "color",      he: "צבע",                    level: 0 },
+  { en: "price",      he: "מחיר",                   level: 0 },
+  { en: "hour",       he: "שעה",                    level: 0 },
+  { en: "week",       he: "שבוע",                   level: 0 },
+  { en: "month",      he: "חודש",                   level: 0 },
+  // פעלים
+  { en: "eat",        he: "לאכול",                  level: 0 },
+  { en: "drink",      he: "לשתות",                  level: 0 },
+  { en: "go",         he: "ללכת",                   level: 0 },
+  { en: "come",       he: "לבוא",                   level: 0 },
+  { en: "see",        he: "לראות",                  level: 0 },
+  { en: "hear",       he: "לשמוע",                  level: 0 },
+  { en: "know",       he: "לדעת",                   level: 0 },
+  { en: "want",       he: "לרצות",                  level: 0 },
+  { en: "need",       he: "לצריך / להזדקק",          level: 0 },
+  { en: "give",       he: "לתת",                    level: 0 },
+  { en: "take",       he: "לקחת",                   level: 0 },
+  { en: "make",       he: "לעשות / להכין",           level: 0 },
+  { en: "say",        he: "לאמר",                   level: 0 },
+  { en: "tell",       he: "לספר / להגיד",            level: 0 },
+  { en: "live",       he: "לחיות / לגור",            level: 0 },
+  { en: "love",       he: "לאהוב",                  level: 0 },
+  { en: "walk",       he: "ללכת / להסתובב",          level: 0 },
+  { en: "run",        he: "לרוץ",                   level: 0 },
+  { en: "read",       he: "לקרוא",                  level: 0 },
+  { en: "write",      he: "לכתוב",                  level: 0 },
+  { en: "speak",      he: "לדבר",                   level: 0 },
+  { en: "learn",      he: "ללמוד",                  level: 0 },
+  { en: "help",       he: "לעזור",                  level: 0 },
+  { en: "buy",        he: "לקנות",                  level: 0 },
+  { en: "open",       he: "לפתוח",                  level: 0 },
+  { en: "close",      he: "לסגור",                  level: 0 },
+  { en: "start",      he: "להתחיל",                 level: 0 },
+  { en: "stop",       he: "לעצור / להפסיק",          level: 0 },
+  { en: "think",      he: "לחשוב",                  level: 0 },
+  { en: "feel",       he: "להרגיש",                 level: 0 },
+  { en: "sleep",      he: "לישון",                  level: 0 },
+  { en: "sit",        he: "לשבת",                   level: 0 },
+  { en: "stand",      he: "לעמוד",                  level: 0 },
+  { en: "play",       he: "לשחק",                   level: 0 },
+  { en: "watch",      he: "לצפות / לשמור",           level: 0 },
+  // תארים
+  { en: "big",        he: "גדול",                   level: 0 },
+  { en: "small",      he: "קטן",                    level: 0 },
+  { en: "good",       he: "טוב",                    level: 0 },
+  { en: "bad",        he: "רע",                     level: 0 },
+  { en: "hot",        he: "חם",                     level: 0 },
+  { en: "cold",       he: "קר",                     level: 0 },
+  { en: "new",        he: "חדש",                    level: 0 },
+  { en: "old",        he: "ישן / זקן",               level: 0 },
+  { en: "happy",      he: "שמח",                    level: 0 },
+  { en: "sad",        he: "עצוב",                   level: 0 },
+  { en: "fast",       he: "מהיר",                   level: 0 },
+  { en: "slow",       he: "איטי",                   level: 0 },
+  { en: "long",       he: "ארוך",                   level: 0 },
+  { en: "short",      he: "קצר",                    level: 0 },
+  { en: "easy",       he: "קל",                     level: 0 },
+  { en: "hard",       he: "קשה",                    level: 0 },
+  { en: "right",      he: "נכון / ימין",             level: 0 },
+  { en: "wrong",      he: "לא נכון / טעות",          level: 0 },
+  { en: "beautiful",  he: "יפה",                    level: 0 },
+  { en: "free",       he: "חופשי / חינם",            level: 0 },
+  { en: "sure",       he: "בטוח",                   level: 0 },
+  { en: "ready",      he: "מוכן",                   level: 0 },
+  { en: "tired",      he: "עייף",                   level: 0 },
+  { en: "clean",      he: "נקי",                    level: 0 },
+  { en: "quiet",      he: "שקט",                    level: 0 },
+  // מילות קישור ואחרות
+  { en: "and",        he: "ו / וגם",                level: 0 },
+  { en: "but",        he: "אבל",                    level: 0 },
+  { en: "because",    he: "כי / בגלל",              level: 0 },
+  { en: "if",         he: "אם",                     level: 0 },
+  { en: "when",       he: "מתי / כאשר",              level: 0 },
+  { en: "before",     he: "לפני",                   level: 0 },
+  { en: "after",      he: "אחרי",                   level: 0 },
+  { en: "now",        he: "עכשיו",                  level: 0 },
+  { en: "always",     he: "תמיד",                   level: 0 },
+  { en: "never",      he: "אף פעם / לעולם לא",       level: 0 },
+  { en: "very",       he: "מאוד",                   level: 0 },
+  { en: "more",       he: "יותר",                   level: 0 },
+  { en: "all",        he: "הכל / כולם",              level: 0 },
+  { en: "some",       he: "כמה / קצת",              level: 0 },
+  { en: "many",       he: "הרבה",                   level: 0 },
+  { en: "together",   he: "ביחד",                   level: 0 },
+  { en: "again",      he: "שוב",                    level: 0 },
+  { en: "also",       he: "גם",                     level: 0 },
+  { en: "already",    he: "כבר",                    level: 0 },
+  { en: "maybe",      he: "אולי",                   level: 0 },
+
   // ═══════════════════════════════════════════
   // AWL Sublist 1 — הנפוצות ביותר → רמה א׳
   // ═══════════════════════════════════════════
@@ -854,7 +985,7 @@ const WORDS = [
   { en: "widespread",   he: "נפוץ / רחב",                level: 3 },
 ];
 
-const LEVEL_LABELS = { 1: "א׳ - בסיסי", 2: "ב׳ - בינוני", 3: "ג׳ - מתקדם" };
+const LEVEL_LABELS = { 0: "For Guy 🙄", 1: "א׳ - בסיסי", 2: "ב׳ - בינוני", 3: "ג׳ - מתקדם" };
 
 let allCards = shuffle([...WORDS]);
 let filteredCards = [...allCards];
@@ -862,7 +993,7 @@ let currentIndex = 0;
 let isFlipped = false;
 let known = new Set();
 let unknown = new Set();
-let selectedLevel = 0;
+let selectedLevel = 'all';
 let reviewMode = false;
 
 function shuffle(arr) {
@@ -875,7 +1006,7 @@ function shuffle(arr) {
 }
 
 function applyLevelFilter() {
-  const base = selectedLevel === 0 ? allCards : allCards.filter(c => c.level === selectedLevel);
+  const base = selectedLevel === 'all' ? allCards : allCards.filter(c => c.level === selectedLevel);
   filteredCards = reviewMode ? base.filter(c => unknown.has(c.en)) : base;
   currentIndex = 0;
 }
@@ -940,7 +1071,7 @@ function render() {
     modeBar.classList.add('visible');
   } else {
     modeBar.classList.remove('visible');
-    const allUnknown = (selectedLevel === 0 ? allCards : allCards.filter(c => c.level === selectedLevel))
+    const allUnknown = (selectedLevel === 'all' ? allCards : allCards.filter(c => c.level === selectedLevel))
       .filter(c => unknown.has(c.en)).length;
     if (allUnknown > 0) {
       banner.classList.add('visible');
@@ -1022,9 +1153,9 @@ function resetProgress() {
 
 function setLevel(lvl) {
   selectedLevel = lvl;
-  [0,1,2,3].forEach(l => {
+  ['all', 0, 1, 2, 3].forEach(l => {
     const btn = document.getElementById('btn-level-' + l);
-    btn.className = 'level-btn' + (selectedLevel === l ? ' active-' + (l === 0 ? 'all' : l) : '');
+    if (btn) btn.className = 'level-btn' + (selectedLevel === l ? ' active-' + l : '');
   });
   applyLevelFilter();
   isFlipped = false;
