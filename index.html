@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>כרטיסיות אמירנט</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="אמירנט">
+  <link rel="apple-touch-icon" href="icon.svg">
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -183,6 +192,24 @@
     .nav-btn:hover { background: #334155; }
 
     .kb-hint { text-align: center; color: #475569; font-size: 12px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #22c55e;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.3s ease;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
 
     .review-banner {
       display: none;
@@ -1050,8 +1077,58 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowDown') markUnknown();
 });
 
-// Init
+// ── LocalStorage ──────────────────────────────
+function saveProgress() {
+  localStorage.setItem('amirant_known',   JSON.stringify([...known]));
+  localStorage.setItem('amirant_unknown', JSON.stringify([...unknown]));
+}
+
+function loadProgress() {
+  try {
+    const k = localStorage.getItem('amirant_known');
+    const u = localStorage.getItem('amirant_unknown');
+    if (k) known   = new Set(JSON.parse(k));
+    if (u) unknown = new Set(JSON.parse(u));
+  } catch(e) {}
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── Patch mark functions to also save ─────────
+const _origMarkKnown = markKnown;
+markKnown = function() { _origMarkKnown(); saveProgress(); showToast('✓ נשמר'); };
+
+const _origMarkUnknown = markUnknown;
+markUnknown = function() { _origMarkUnknown(); saveProgress(); showToast('✗ נשמר'); };
+
+const _origResetProgress = resetProgress;
+resetProgress = function() {
+  if (!confirm('לאפס את כל ההתקדמות?')) return;
+  _origResetProgress();
+  saveProgress();
+  showToast('התקדמות אופסה');
+};
+
+// ── Service Worker ─────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ── Init ──────────────────────────────────────
+loadProgress();
 render();
+
+// Show "saved" toast when page loads with existing progress
+if (known.size + unknown.size > 0) {
+  setTimeout(() => showToast('✓ התקדמות נטענה'), 600);
+}
 </script>
+
+<div class="toast" id="toast"></div>
 </body>
 </html>

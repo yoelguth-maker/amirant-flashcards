@@ -1,0 +1,17 @@
+{
+  "name": "כרטיסיות אמירנט",
+  "short_name": "אמירנט",
+  "description": "כרטיסיות ללמידת אוצר מילים אקדמי לבחינת האמירנט",
+  "start_url": "/amirant-flashcards/",
+  "scope": "/amirant-flashcards/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
