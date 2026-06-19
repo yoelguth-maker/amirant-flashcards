@@ -1,6 +1,6 @@
 {
-  "name": "כרטיסיות אמירנט",
-  "short_name": "אמירנט",
+  "name": "לומדים ונהנים",
+  "short_name": "לומדים",
   "description": "כרטיסיות ללמידת אוצר מילים אקדמי לבחינת האמירנט",
   "start_url": "/amirant-flashcards/",
   "scope": "/amirant-flashcards/",

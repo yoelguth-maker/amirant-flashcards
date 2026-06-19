@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>כרטיסיות אמירנט</title>
+  <title>לומדים ונהנים</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="אמירנט">
+  <meta name="apple-mobile-web-app-title" content="לומדים ונהנים">
   <link rel="apple-touch-icon" href="icon.svg">
 
   <style>
@@ -32,7 +32,8 @@
       align-items: center;
       margin-bottom: 20px;
     }
-    h1 { font-size: 22px; font-weight: 700; }
+    h1 { font-size: 20px; font-weight: 700; }
+    @media (max-width: 360px) { h1 { font-size: 17px; } }
 
     .icon-btn {
       background: #1e293b;
@@ -419,7 +420,7 @@
   <!-- Main screen -->
   <div id="main-screen">
     <div class="header">
-      <h1>🎓 כרטיסיות אמירנט</h1>
+      <h1>🎓 לומדים ונהנים</h1>
       <div>
         <button class="icon-btn" onclick="shuffleCards()" title="ערבב">🔀</button>
         <button class="icon-btn" onclick="resetProgress()" title="אפס התקדמות">↺</button>
