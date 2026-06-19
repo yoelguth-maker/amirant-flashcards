@@ -213,6 +213,103 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
+    /* ── Quiz ────────────────────────────── */
+    #quiz-screen { display: none; }
+    #quiz-screen.visible { display: block; }
+
+    .quiz-level-select { text-align: center; padding: 20px 0; }
+    .quiz-level-select h2 { font-size: 22px; margin-bottom: 8px; }
+    .quiz-level-select p  { color: #94a3b8; margin-bottom: 20px; font-size: 14px; }
+    .quiz-level-btns { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .quiz-level-btn {
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid;
+      background: transparent;
+      transition: all 0.15s;
+    }
+    .qlb-1 { color: #22c55e; border-color: #22c55e; }
+    .qlb-1:hover { background: #22c55e22; }
+    .qlb-2 { color: #f59e0b; border-color: #f59e0b; }
+    .qlb-2:hover { background: #f59e0b22; }
+    .qlb-3 { color: #ef4444; border-color: #ef4444; }
+    .qlb-3:hover { background: #ef444422; }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .quiz-score { font-weight: 700; color: #22c55e; font-size: 15px; }
+
+    .quiz-sentence-box {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 28px 22px;
+      text-align: center;
+      margin-bottom: 18px;
+      font-size: 17px;
+      line-height: 1.7;
+      color: #f1f5f9;
+      direction: ltr;
+    }
+    .blank {
+      display: inline-block;
+      border-bottom: 3px solid #3b82f6;
+      min-width: 80px;
+      color: #3b82f6;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .quiz-option {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #e2e8f0;
+      cursor: pointer;
+      text-align: right;
+      transition: all 0.12s;
+      direction: ltr;
+    }
+    .quiz-option:hover:not(:disabled) { border-color: #3b82f6; background: #1e3a5f; }
+    .quiz-option.correct { border-color: #22c55e; background: #22c55e22; color: #22c55e; }
+    .quiz-option.wrong   { border-color: #ef4444; background: #ef444422; color: #ef4444; }
+    .quiz-option:disabled { cursor: default; }
+
+    .quiz-result-box {
+      text-align: center;
+      padding: 40px 20px;
+      background: #1e293b;
+      border-radius: 16px;
+      border: 2px solid #334155;
+    }
+    .quiz-result-num  { font-size: 64px; font-weight: 800; color: #f1f5f9; }
+    .quiz-result-of   { font-size: 18px; color: #94a3b8; margin-bottom: 6px; }
+    .quiz-result-msg  { font-size: 22px; margin: 12px 0 28px; }
+    .quiz-result-btns { display: flex; gap: 12px; justify-content: center; }
+    .quiz-again-btn {
+      background: #3b82f6; color: #fff; border: none;
+      border-radius: 12px; padding: 12px 28px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+    }
+    .quiz-back-btn {
+      background: #1e293b; color: #94a3b8; border: 1px solid #334155;
+      border-radius: 12px; padding: 12px 28px;
+      font-size: 15px; cursor: pointer;
+    }
+
     .review-banner {
       display: none;
       align-items: center;
@@ -327,6 +424,7 @@
         <button class="icon-btn" onclick="shuffleCards()" title="ערבב">🔀</button>
         <button class="icon-btn" onclick="resetProgress()" title="אפס התקדמות">↺</button>
         <button class="icon-btn" onclick="showStats()" title="סטטיסטיקות">📊</button>
+        <button class="icon-btn" onclick="openQuiz()" title="השלמות משפטים">✏️</button>
       </div>
     </div>
 
@@ -400,6 +498,55 @@
     </div>
     <div id="unknown-section" class="section"></div>
     <div id="known-section" class="section"></div>
+  </div>
+
+  <!-- Quiz screen -->
+  <div id="quiz-screen">
+
+    <!-- Level select -->
+    <div id="quiz-level-select">
+      <div class="header">
+        <h1>✏️ השלמות משפטים</h1>
+        <button class="back-btn" onclick="closeQuiz()">← חזור</button>
+      </div>
+      <div class="quiz-level-select">
+        <p>בחר רמה להתחיל:</p>
+        <div class="quiz-level-btns">
+          <button class="quiz-level-btn qlb-1" onclick="startQuiz(1)">א׳ — בסיסי</button>
+          <button class="quiz-level-btn qlb-2" onclick="startQuiz(2)">ב׳ — בינוני</button>
+          <button class="quiz-level-btn qlb-3" onclick="startQuiz(3)">ג׳ — מתקדם</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quiz card -->
+    <div id="quiz-card" style="display:none">
+      <div class="quiz-header">
+        <span id="quiz-progress-text">שאלה 1 מתוך 10</span>
+        <span class="quiz-score" id="quiz-score-display">✓ 0</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:18px">
+        <div class="progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="quiz-sentence-box">
+        <p id="quiz-sentence"></p>
+      </div>
+      <div class="quiz-options" id="quiz-options"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="quiz-result-box" style="display:none">
+      <div class="quiz-result-box">
+        <div class="quiz-result-num" id="quiz-result-num">0</div>
+        <div class="quiz-result-of" id="quiz-result-of">מתוך 10</div>
+        <div class="quiz-result-msg" id="quiz-result-msg"></div>
+        <div class="quiz-result-btns">
+          <button class="quiz-again-btn" id="quiz-again-btn">🔁 שוב</button>
+          <button class="quiz-back-btn" onclick="closeQuiz()">← חזור</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -987,6 +1134,103 @@ const WORDS = [
 
 const LEVEL_LABELS = { 0: "For Guy 🙄", 1: "א׳ - בסיסי", 2: "ב׳ - בינוני", 3: "ג׳ - מתקדם" };
 
+// ── משפטי השלמה ────────────────────────────────────────────────────────────
+const SENTENCES = [
+  // רמה א׳
+  { s: "Scientists need to ___ the data carefully before publishing.", a: "analyze", l: 1 },
+  { s: "Her ___ to solving the problem was both creative and practical.", a: "approach", l: 1 },
+  { s: "One major ___ of regular exercise is improved mental health.", a: "benefit", l: 1 },
+  { s: "Pollution is the main ___ of climate change.", a: "cause", l: 1 },
+  { s: "The report tries to ___ what 'success' means in this field.", a: "define", l: 1 },
+  { s: "The experiment helped ___ a link between stress and illness.", a: "establish", l: 1 },
+  { s: "The lawyer presented strong ___ to support her argument.", a: "evidence", l: 1 },
+  { s: "To understand the quote, you must read it in ___.", a: "context", l: 1 },
+  { s: "The study aims to ___ the key factors behind the problem.", a: "identify", l: 1 },
+  { s: "Social media has a major ___ on young people's behavior.", a: "influence", l: 1 },
+  { s: "The project will ___ collaboration between several departments.", a: "involve", l: 1 },
+  { s: "The government must address the ___ of rising housing costs.", a: "issue", l: 1 },
+  { s: "The researchers chose a qualitative ___ for their study.", a: "method", l: 1 },
+  { s: "It is difficult to ___ accurate data from such a small sample.", a: "obtain", l: 1 },
+  { s: "The main ___ of this essay is to compare two competing theories.", a: "purpose", l: 1 },
+  { s: "The exam will ___ students to write three separate essays.", a: "require", l: 1 },
+  { s: "The ___ of the experiment confirmed the original hypothesis.", a: "result", l: 1 },
+  { s: "The study found a ___ difference between the two groups.", a: "significant", l: 1 },
+  { s: "The findings ___ that diet has a major effect on long-term health.", a: "suggest", l: 1 },
+  { s: "Darwin's ___ of evolution changed how we understand life on Earth.", a: "theory", l: 1 },
+  { s: "The company plans to ___ a new product for international markets.", a: "develop", l: 1 },
+  { s: "More ___ is needed before we can be sure of the drug's safety.", a: "research", l: 1 },
+  { s: "The results seem to ___ the original hypothesis.", a: "support", l: 1 },
+  { s: "The data seems to ___ that unemployment is slowly decreasing.", a: "indicate", l: 1 },
+  { s: "Let us ___ these two methods to find which works better.", a: "compare", l: 1 },
+  { s: "We need to carefully ___ all options before making a final decision.", a: "consider", l: 1 },
+  { s: "Sales continued to ___ after the new competitor entered the market.", a: "increase", l: 1 },
+  { s: "It is ___ to read the safety instructions before starting.", a: "important", l: 1 },
+  { s: "The report aims to ___ all the relevant data in one place.", a: "include", l: 1 },
+  { s: "The article provides useful background ___ about the conflict.", a: "information", l: 1 },
+  // רמה ב׳
+  { s: "Hard work and dedication are needed to ___ great results.", a: "achieve", l: 2 },
+  { s: "The report found that safety measures were not ___.", a: "adequate", l: 2 },
+  { s: "If plan A fails, we must consider an ___ solution.", a: "alternative", l: 2 },
+  { s: "It was ___ from her expression that she disagreed.", a: "apparent", l: 2 },
+  { s: "Always choose ___ language when writing a formal report.", a: "appropriate", l: 2 },
+  { s: "Do not ___ that every reader already knows the background.", a: "assume", l: 2 },
+  { s: "Learning a new language is always a real ___.", a: "challenge", l: 2 },
+  { s: "Everyone should ___ to solving environmental problems.", a: "contribute", l: 2 },
+  { s: "The scientist used a diagram to ___ how the process works.", a: "demonstrate", l: 2 },
+  { s: "The report ___ the importance of acting quickly on the issue.", a: "emphasize", l: 2 },
+  { s: "It is important to ___ both the advantages and disadvantages.", a: "evaluate", l: 2 },
+  { s: "The company plans to ___ its services into new international markets.", a: "expand", l: 2 },
+  { s: "Technology can ___ better communication between remote teams.", a: "facilitate", l: 2 },
+  { s: "Solar panels ___ electricity directly from sunlight.", a: "generate", l: 2 },
+  { s: "The new policy will have a major ___ on small businesses.", a: "impact", l: 2 },
+  { s: "The school will ___ the new attendance policy next semester.", a: "implement", l: 2 },
+  { s: "The police decided to ___ the suspicious transactions.", a: "investigate", l: 2 },
+  { s: "Can you ___ your decision to change the original plan?", a: "justify", l: 2 },
+  { s: "It is important to ___ a healthy routine throughout the year.", a: "maintain", l: 2 },
+  { s: "We had to ___ our original plan because of unexpected costs.", a: "modify", l: 2 },
+  { s: "The new treatment shows great ___ as a cure for the disease.", a: "potential", l: 2 },
+  { s: "Please make sure all your sources are ___ to the essay topic.", a: "relevant", l: 2 },
+  { s: "The company adopted a new ___ to attract younger customers.", a: "strategy", l: 2 },
+  { s: "There was not ___ evidence to support the original claim.", a: "sufficient", l: 2 },
+  { s: "There is a growing ___ towards remote work in many industries.", a: "trend", l: 2 },
+  { s: "The new regulation will ___ the amount of sugar in soft drinks.", a: "restrict", l: 2 },
+  { s: "The results were ___ from what the team had originally predicted.", a: "diverse", l: 2 },
+  { s: "A new political movement began to ___ following the financial crisis.", a: "emerge", l: 2 },
+  { s: "Strong feedback will ___ student performance over time.", a: "enhance", l: 2 },
+  { s: "Several key ___ contributed to the success of the project.", a: "factor", l: 2 },
+  // רמה ג׳
+  { s: "The instructions were ___ and left room for misinterpretation.", a: "ambiguous", l: 3 },
+  { s: "Managers should always ___ problems before they become serious.", a: "anticipate", l: 3 },
+  { s: "A good essay must present a ___ and well-structured argument.", a: "coherent", l: 3 },
+  { s: "These five countries ___ more than half of the world's economy.", a: "constitute", l: 3 },
+  { s: "The government's decision caused great ___ among the scientific community.", a: "controversy", l: 3 },
+  { s: "The main ___ for the scholarship is academic excellence.", a: "criterion", l: 3 },
+  { s: "Clean water is ___ for human survival.", a: "crucial", l: 3 },
+  { s: "From the available data, we can ___ that sales are steadily rising.", a: "deduce", l: 3 },
+  { s: "Could you ___ on the point you made in the previous paragraph?", a: "elaborate", l: 3 },
+  { s: "The study is based on ___ evidence collected over fifteen years.", a: "empirical", l: 3 },
+  { s: "The contract contained ___ instructions about the payment terms.", a: "explicit", l: 3 },
+  { s: "Oil prices tend to ___ dramatically based on global events.", a: "fluctuate", l: 3 },
+  { s: "Access to education is ___ for reducing poverty worldwide.", a: "fundamental", l: 3 },
+  { s: "There was an ___ understanding between both parties.", a: "implicit", l: 3 },
+  { s: "What can we ___ from this data about changing consumer habits?", a: "infer", l: 3 },
+  { s: "The ___ that we stop learning after university is completely false.", a: "notion", l: 3 },
+  { s: "It is a ___ that the more choices we have, the less satisfied we feel.", a: "paradox", l: 3 },
+  { s: "Public ___ of the company changed dramatically after the scandal.", a: "perception", l: 3 },
+  { s: "Looking at the issue from a different ___ can change everything.", a: "perspective", l: 3 },
+  { s: "The experience had a ___ and lasting effect on his view of the world.", a: "profound", l: 3 },
+  { s: "A ___ person considers all available facts before making a decision.", a: "rational", l: 3 },
+  { s: "Repetition helps to ___ newly learned vocabulary.", a: "reinforce", l: 3 },
+  { s: "The project required a ___ investment of both time and resources.", a: "substantial", l: 3 },
+  { s: "The country went through a difficult ___ from war to peace.", a: "transition", l: 3 },
+  { s: "It is difficult to ___ economic growth over a very long period.", a: "sustain", l: 3 },
+  { s: "Results ___ significantly between different groups in the study.", a: "fluctuate", l: 3 },
+  { s: "A good leader must be able to ___ to rapidly changing conditions.", a: "adapt", l: 3 },
+  { s: "The two reports were in sharp ___ with each other.", a: "contrast", l: 2 },
+  { s: "Many companies ___ customer data to improve their services.", a: "utilize", l: 2 },
+  { s: "The manager tried to ___ the new software across all departments.", a: "implement", l: 2 },
+];
+
 let allCards = shuffle([...WORDS]);
 let filteredCards = [...allCards];
 let currentIndex = 0;
@@ -1006,7 +1250,10 @@ function shuffle(arr) {
 }
 
 function applyLevelFilter() {
-  const base = selectedLevel === 'all' ? allCards : allCards.filter(c => c.level === selectedLevel);
+  // "הכל" מציג רק רמות 1-3, ללא For Guy (רמה 0)
+  const base = selectedLevel === 'all'
+    ? allCards.filter(c => c.level > 0)
+    : allCards.filter(c => c.level === selectedLevel);
   filteredCards = reviewMode ? base.filter(c => unknown.has(c.en)) : base;
   currentIndex = 0;
 }
@@ -1213,6 +1460,101 @@ function saveProgress() {
   localStorage.setItem('amirant_known',   JSON.stringify([...known]));
   localStorage.setItem('amirant_unknown', JSON.stringify([...unknown]));
 }
+
+// ── QUIZ LOGIC ──────────────────────────────────────────────────────────────
+
+let quizCurrentLevel = 1;
+let quizQueue = [];
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+function openQuiz() {
+  document.getElementById('main-screen').classList.add('hidden');
+  document.getElementById('stats-screen').classList.remove('visible');
+  document.getElementById('quiz-screen').classList.add('visible');
+  document.getElementById('quiz-level-select').style.display = 'block';
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('quiz-result-box').style.display = 'none';
+}
+
+function closeQuiz() {
+  document.getElementById('quiz-screen').classList.remove('visible');
+  document.getElementById('main-screen').classList.remove('hidden');
+}
+
+function startQuiz(level) {
+  quizCurrentLevel = level;
+  const pool = SENTENCES.filter(s => s.l === level);
+  quizQueue = shuffle([...pool]).slice(0, 10);
+  quizIndex = 0;
+  quizScore = 0;
+  quizAnswered = false;
+
+  document.getElementById('quiz-level-select').style.display = 'none';
+  document.getElementById('quiz-result-box').style.display = 'none';
+  document.getElementById('quiz-card').style.display = 'block';
+  renderQuizCard();
+}
+
+function renderQuizCard() {
+  if (quizIndex >= quizQueue.length) { showQuizResult(); return; }
+
+  const item = quizQueue[quizIndex];
+  quizAnswered = false;
+
+  // 3 distractors from same level, different from answer
+  const pool = WORDS.filter(w => w.level === item.l && w.en !== item.a);
+  const distractors = shuffle([...pool]).slice(0, 3).map(w => w.en);
+  const options = shuffle([item.a, ...distractors]);
+
+  document.getElementById('quiz-progress-text').textContent = `שאלה ${quizIndex + 1} מתוך ${quizQueue.length}`;
+  document.getElementById('quiz-score-display').textContent = `✓ ${quizScore}`;
+  document.getElementById('quiz-progress-fill').style.width = `${(quizIndex / quizQueue.length) * 100}%`;
+  document.getElementById('quiz-sentence').innerHTML =
+    item.s.replace('___', '<span class="blank">___</span>');
+
+  const el = document.getElementById('quiz-options');
+  el.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.onclick = () => checkQuizAnswer(btn, opt, item.a, options);
+    el.appendChild(btn);
+  });
+}
+
+function checkQuizAnswer(clicked, selected, correct, allOptions) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  document.querySelectorAll('.quiz-option').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === correct)  btn.classList.add('correct');
+    if (btn.textContent === selected && selected !== correct) btn.classList.add('wrong');
+  });
+
+  if (selected === correct) quizScore++;
+
+  setTimeout(() => { quizIndex++; renderQuizCard(); }, 1300);
+}
+
+function showQuizResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('quiz-result-box').style.display = 'block';
+  document.getElementById('quiz-progress-fill').style.width = '100%';
+
+  const pct = Math.round((quizScore / quizQueue.length) * 100);
+  const msg = pct >= 90 ? '🎉 מצוין!' : pct >= 70 ? '👍 כל הכבוד!' : pct >= 50 ? '💪 לא רע, תמשיך!' : '📚 כדאי לחזור על המילים';
+
+  document.getElementById('quiz-result-num').textContent = `${quizScore}/${quizQueue.length}`;
+  document.getElementById('quiz-result-of').textContent = `${pct}%`;
+  document.getElementById('quiz-result-msg').textContent = msg;
+  document.getElementById('quiz-again-btn').onclick = () => startQuiz(quizCurrentLevel);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 function loadProgress() {
   try {
