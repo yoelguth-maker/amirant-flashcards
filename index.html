@@ -2347,6 +2347,11 @@ function stopDuelTimer() {
 loadProgress();
 render();
 
+// אם נפתח לינק עם ?room= — פתח דו-קרב אוטומטית
+if (new URLSearchParams(location.search).get('room')) {
+  setTimeout(openDuel, 400);
+}
+
 // Show "saved" toast when page loads with existing progress
 if (known.size + unknown.size > 0) {
   setTimeout(() => showToast('✓ התקדמות נטענה'), 600);
