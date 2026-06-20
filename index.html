@@ -414,6 +414,7 @@
     .section { margin-bottom: 24px; }
 
     /* ── DUEL SCREEN ─────────────────────────── */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
     #duel-screen { display:none; }
     #duel-screen.visible { display:block; }
 
@@ -702,12 +703,25 @@
       </div>
       <label class="duel-label">השם שלך</label>
       <input type="text" id="duel-my-name" class="duel-input" placeholder="הכנס שם..." maxlength="16">
+
+      <!-- אם נכנסת עם קישור — אזור הצטרפות בולט -->
+      <div id="dp-join-zone" style="display:none">
+        <div style="background:#0f2a4a;border:2px solid #3b82f6;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center">
+          <div style="font-size:13px;color:#60a5fa;margin-bottom:8px">🔗 קיבלת הזמנה לחדר:</div>
+          <div style="font-size:40px;font-weight:900;letter-spacing:8px;color:#e2e8f0" id="dp-join-code-display">----</div>
+        </div>
+        <button class="duel-btn duel-btn-green" style="font-size:18px;padding:16px" onclick="joinRoom()">⚔️ הצטרף למשחק!</button>
+        <div class="duel-or">— או —</div>
+      </div>
+
       <button class="duel-btn duel-btn-primary" onclick="createRoom()">🏟️ צור חדר חדש</button>
-      <div class="duel-or">— או הצטרף לחדר קיים —</div>
-      <label class="duel-label">קוד חדר (4 אותיות)</label>
-      <div class="duel-join-row">
-        <input type="text" id="duel-code-input" class="duel-input code-input" placeholder="WXYZ" maxlength="4">
-        <button class="duel-btn duel-btn-green" onclick="joinRoom()">הצטרף →</button>
+      <div id="dp-manual-join">
+        <div class="duel-or">— או הצטרף לחדר קיים —</div>
+        <label class="duel-label">קוד חדר (4 אותיות)</label>
+        <div class="duel-join-row">
+          <input type="text" id="duel-code-input" class="duel-input code-input" placeholder="WXYZ" maxlength="4">
+          <button class="duel-btn duel-btn-green" onclick="joinRoom()">הצטרף →</button>
+        </div>
       </div>
     </div>
 
@@ -723,7 +737,11 @@
       </div>
       <button class="duel-btn duel-btn-wa"      onclick="shareRoom()">📱 שתף ב-WhatsApp</button>
       <button class="duel-btn"                   onclick="copyRoomLink()">📋 העתק קישור</button>
-      <p style="text-align:center;color:#475569;font-size:13px;margin-top:4px">ממתין לשחקן שני... ⏳</p>
+      <div style="text-align:center;margin-top:16px">
+        <div style="font-size:28px;animation:pulse 1.5s infinite">⏳</div>
+        <p style="color:#94a3b8;font-size:14px;margin-top:6px">ממתין לשחקן שני להצטרף...</p>
+        <p style="color:#475569;font-size:12px;margin-top:4px">כשהם ייכנסו — המשחק יתחיל אוטומטית</p>
+      </div>
     </div>
 
     <!-- 3. Game -->
@@ -1950,7 +1968,16 @@ function openDuel() {
     const saved = localStorage.getItem('duel_name') || '';
     document.getElementById('duel-my-name').value = saved;
     const p = new URLSearchParams(location.search);
-    if (p.get('room')) document.getElementById('duel-code-input').value = p.get('room').toUpperCase();
+    const roomCode = p.get('room');
+    if (roomCode) {
+      const code = roomCode.toUpperCase();
+      document.getElementById('duel-code-input').value = code;
+      // הצג את אזור ההצטרפות הבולט
+      document.getElementById('dp-join-zone').style.display = '';
+      document.getElementById('dp-join-code-display').textContent = code;
+      document.getElementById('dp-manual-join').style.display = 'none';
+      document.getElementById('duel-my-name').focus();
+    }
   }).catch(() => showToast('דו-קרב דורש אינטרנט 🌐'));
 }
 
@@ -1992,10 +2019,11 @@ async function createRoom() {
     p1:{name, score:0}, p2:null,
     turn:'p1', challenge:null, ts:Date.now()
   });
-  roomRef.onDisconnect().remove(); // auto-cleanup on disconnect
+  // לא מוחקים את החדר בניתוק — זה גרם לחדר להיעלם בלי סיבה
   document.getElementById('dp-room-code').textContent = code;
   showDP('dp-waiting');
   roomRef.on('value', onRoom);
+  showToast('✅ חדר ' + code + ' נוצר! שלח את הקוד');
 }
 
 async function joinRoom() {
@@ -2008,7 +2036,8 @@ async function joinRoom() {
   roomRef = db.ref('duels/' + code);
   const snap = await roomRef.once('value');
   const room = snap.val();
-  if (!room)                    { showToast('חדר לא קיים 🤷'); myRole=null; return; }
+  if (!room)                    { showToast('חדר לא קיים — בקש קוד חדש 🤷'); myRole=null; return; }
+  if (Date.now() - room.ts > 2*60*60*1000) { showToast('החדר פג תוקף — צור חדר חדש'); myRole=null; return; }
   if (room.state !== 'waiting') { showToast('המשחק כבר התחיל'); myRole=null; return; }
   if (room.p2)                  { showToast('החדר מלא'); myRole=null; return; }
   await roomRef.update({ p2:{name, score:0}, state:'playing' });
