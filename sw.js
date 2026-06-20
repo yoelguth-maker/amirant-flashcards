@@ -1,4 +1,4 @@
-const CACHE = 'amirant-v4';
+const CACHE = 'amirant-v5';
 const STATIC = [
   '/amirant-flashcards/manifest.json',
   '/amirant-flashcards/icon.svg',

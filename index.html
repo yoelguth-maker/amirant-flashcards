@@ -412,6 +412,146 @@
     .section-title.red   { color: #ef4444; }
     .section-title.green { color: #22c55e; }
     .section { margin-bottom: 24px; }
+
+    /* ── DUEL SCREEN ─────────────────────────── */
+    #duel-screen { display:none; }
+    #duel-screen.visible { display:block; }
+
+    .duel-label { display:block; font-size:13px; color:#94a3b8; margin-bottom:6px; font-weight:600; }
+    .duel-input {
+      width:100%; background:#1e293b; border:1px solid #334155;
+      border-radius:10px; color:#e2e8f0; font-size:16px;
+      padding:12px 14px; margin-bottom:12px; outline:none; font-family:inherit;
+    }
+    .duel-input:focus { border-color:#3b82f6; }
+    .duel-input.code-input {
+      text-transform:uppercase; letter-spacing:8px; font-size:30px;
+      text-align:center; font-weight:900;
+    }
+    .duel-btn {
+      width:100%; padding:14px; border-radius:12px; font-size:16px; font-weight:700;
+      cursor:pointer; border:1px solid #334155; margin-bottom:10px;
+      background:#1e293b; color:#e2e8f0; transition:opacity 0.15s; font-family:inherit;
+    }
+    .duel-btn:active { opacity:0.8; }
+    .duel-btn-primary { background:#1d4ed8; border-color:#2563eb; color:#fff; }
+    .duel-btn-green   { background:#065f46; border-color:#059669; color:#fff; }
+    .duel-btn-wa      { background:#25d366; border-color:#1ebe5d; color:#000; }
+    .duel-or { text-align:center; color:#475569; margin:14px 0; font-size:13px; }
+    .duel-join-row { display:flex; gap:10px; align-items:flex-start; }
+    .duel-join-row .duel-input { margin-bottom:0; }
+    .duel-join-row .duel-btn   { margin-bottom:0; flex-shrink:0; width:auto; padding:13px 16px; white-space:nowrap; }
+
+    /* Waiting for P2 */
+    .duel-code-box {
+      background:#1e293b; border:2px solid #3b82f6; border-radius:16px;
+      text-align:center; padding:28px 16px; margin:20px 0;
+    }
+    .duel-code-big {
+      font-size:54px; font-weight:900; letter-spacing:10px;
+      color:#3b82f6; display:block; margin-bottom:6px;
+    }
+    .duel-code-hint { font-size:13px; color:#94a3b8; }
+
+    /* Scoreboard */
+    .duel-scoreboard {
+      display:flex; align-items:center; justify-content:space-between;
+      background:#1e293b; border-radius:14px; padding:12px 10px;
+      margin-bottom:18px; border:1px solid #334155;
+    }
+    .ds-side { flex:1; text-align:center; padding:6px 4px; border-radius:10px; transition:background 0.3s; }
+    .ds-side.active-turn { background:#0f2a4a; }
+    .ds-name { font-size:12px; color:#94a3b8; margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:90px; margin-left:auto; margin-right:auto; }
+    .ds-pts  { font-size:40px; font-weight:900; color:#e2e8f0; line-height:1; }
+    .ds-mid  { text-align:center; padding:0 6px; }
+    .ds-target { font-size:11px; color:#475569; margin-bottom:4px; }
+
+    /* Game panels */
+    .dp-title { font-size:16px; font-weight:700; color:#e2e8f0; margin-bottom:16px; line-height:1.4; }
+    .duel-lvl-row { display:flex; gap:8px; margin-bottom:14px; }
+    .d-lvl-btn {
+      flex:1; padding:12px 4px; border-radius:12px; font-size:13px; font-weight:600;
+      cursor:pointer; border:2px solid #334155; background:#1e293b; color:#475569;
+      text-align:center; line-height:1.5; transition:all 0.15s; font-family:inherit;
+    }
+    .d-lvl-btn small { font-size:11px; font-weight:400; display:block; }
+    .d-lvl-btn.sel-1 { background:#14532d; border-color:#22c55e; color:#86efac; }
+    .d-lvl-btn.sel-2 { background:#713f12; border-color:#eab308; color:#fde68a; }
+    .d-lvl-btn.sel-3 { background:#7f1d1d; border-color:#ef4444; color:#fca5a5; }
+
+    .duel-word-preview {
+      background:#1e293b; border:2px solid #3b82f6; border-radius:16px;
+      padding:26px 16px; text-align:center; margin-bottom:14px;
+    }
+    .dp-pick-en  { font-size:36px; font-weight:800; color:#e2e8f0; margin-bottom:6px; }
+    .dp-pick-pts { font-size:14px; color:#60a5fa; font-weight:600; }
+
+    .duel-pick-actions { display:flex; gap:10px; }
+    .dp-shuffle-btn {
+      flex:1; padding:13px; border-radius:10px; background:#1e293b;
+      border:1px solid #334155; color:#e2e8f0; font-size:14px;
+      cursor:pointer; font-family:inherit;
+    }
+    .dp-fire-btn {
+      flex:2; padding:13px; border-radius:10px; background:#1d4ed8;
+      border:none; color:#fff; font-size:14px; font-weight:700;
+      cursor:pointer; font-family:inherit;
+    }
+
+    /* Center panels (waiting) */
+    .dp-center { text-align:center; padding:48px 0 32px; }
+    .dp-big-icon { font-size:64px; margin-bottom:14px; }
+    .dp-center-txt { font-size:16px; color:#94a3b8; }
+    .dp-peek-box {
+      background:#1e293b; border:1px dashed #334155; border-radius:12px;
+      padding:14px 16px; margin-top:18px;
+    }
+    .dp-peek-word { font-size:20px; font-weight:700; color:#e2e8f0; }
+    .dp-peek-note { font-size:12px; color:#475569; margin-top:4px; }
+
+    /* Answer screen */
+    .dp-pts-badge {
+      display:inline-block; background:#7c3aed; color:#fff;
+      padding:4px 16px; border-radius:20px; font-size:14px;
+      font-weight:700; margin-bottom:16px;
+    }
+    .dp-answer-word {
+      font-size:42px; font-weight:900; color:#e2e8f0;
+      text-align:center; margin:14px 0; letter-spacing:-1px;
+    }
+    .dp-opts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+    .dp-opt {
+      padding:16px 8px; border-radius:12px; background:#1e293b;
+      border:2px solid #334155; color:#e2e8f0; font-size:17px;
+      cursor:pointer; font-weight:600; text-align:center;
+      transition:transform 0.1s; font-family:inherit;
+    }
+    .dp-opt:not(:disabled):active { transform:scale(0.95); }
+    .dp-opt.correct { background:#14532d; border-color:#22c55e; color:#86efac; }
+    .dp-opt.wrong   { background:#7f1d1d; border-color:#ef4444; color:#fca5a5; }
+    .dp-opt:disabled { cursor:default; }
+    .dp-timer-wrap { display:flex; align-items:center; gap:10px; margin-top:6px; }
+    .dp-timer-track { flex:1; height:8px; background:#1e293b; border-radius:4px; overflow:hidden; border:1px solid #334155; }
+    .dp-timer-fill  { height:100%; width:100%; background:#3b82f6; border-radius:4px; transition:width 0.95s linear, background 0.3s; }
+    .dp-timer-num   { font-size:13px; color:#94a3b8; min-width:22px; text-align:left; }
+
+    /* Round result */
+    .dp-result-emoji    { font-size:72px; text-align:center; margin:16px 0 8px; }
+    .dp-result-headline { font-size:22px; font-weight:700; text-align:center; margin-bottom:10px; color:#e2e8f0; }
+    .dp-result-word     { text-align:center; font-size:17px; color:#94a3b8; margin-bottom:6px; }
+    .dp-result-word b   { color:#e2e8f0; }
+    .dp-result-pts      { text-align:center; font-size:15px; color:#60a5fa; font-weight:600; margin-bottom:24px; }
+    .dp-next-btn {
+      width:100%; padding:14px; border-radius:12px; background:#1d4ed8;
+      border:none; color:#fff; font-size:16px; font-weight:700;
+      cursor:pointer; font-family:inherit;
+    }
+
+    /* Game over */
+    .dp-gameover  { text-align:center; padding:48px 0 32px; }
+    .dp-go-icon   { font-size:80px; margin-bottom:14px; }
+    .dp-go-title  { font-size:28px; font-weight:900; color:#e2e8f0; margin-bottom:6px; }
+    .dp-go-score  { font-size:52px; font-weight:900; color:#3b82f6; margin-bottom:30px; }
   </style>
 </head>
 <body>
@@ -426,6 +566,7 @@
         <button class="icon-btn" onclick="resetProgress()" title="אפס התקדמות">↺</button>
         <button class="icon-btn" onclick="showStats()" title="סטטיסטיקות">📊</button>
         <button class="icon-btn" onclick="openQuiz()" title="השלמות משפטים">✏️</button>
+        <button class="icon-btn" onclick="openDuel()" title="דו קרב">⚔️</button>
       </div>
     </div>
 
@@ -545,6 +686,133 @@
           <button class="quiz-again-btn" id="quiz-again-btn">🔁 שוב</button>
           <button class="quiz-back-btn" onclick="closeQuiz()">← חזור</button>
         </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ⚔️ Duel screen -->
+  <div id="duel-screen">
+
+    <!-- 1. Lobby -->
+    <div id="dp-lobby">
+      <div class="header">
+        <h1>⚔️ דו-קרב</h1>
+        <button class="back-btn" onclick="closeDuel()">← חזור</button>
+      </div>
+      <label class="duel-label">השם שלך</label>
+      <input type="text" id="duel-my-name" class="duel-input" placeholder="הכנס שם..." maxlength="16">
+      <button class="duel-btn duel-btn-primary" onclick="createRoom()">🏟️ צור חדר חדש</button>
+      <div class="duel-or">— או הצטרף לחדר קיים —</div>
+      <label class="duel-label">קוד חדר (4 אותיות)</label>
+      <div class="duel-join-row">
+        <input type="text" id="duel-code-input" class="duel-input code-input" placeholder="WXYZ" maxlength="4">
+        <button class="duel-btn duel-btn-green" onclick="joinRoom()">הצטרף →</button>
+      </div>
+    </div>
+
+    <!-- 2. Waiting for P2 to join -->
+    <div id="dp-waiting" style="display:none">
+      <div class="header">
+        <h1>⚔️ חדר נוצר</h1>
+        <button class="back-btn" onclick="leaveRoom()">← יציאה</button>
+      </div>
+      <div class="duel-code-box">
+        <span class="duel-code-big" id="dp-room-code">----</span>
+        <div class="duel-code-hint">שלח את הקוד לחבר שלך</div>
+      </div>
+      <button class="duel-btn duel-btn-wa"      onclick="shareRoom()">📱 שתף ב-WhatsApp</button>
+      <button class="duel-btn"                   onclick="copyRoomLink()">📋 העתק קישור</button>
+      <p style="text-align:center;color:#475569;font-size:13px;margin-top:4px">ממתין לשחקן שני... ⏳</p>
+    </div>
+
+    <!-- 3. Game -->
+    <div id="dp-game" style="display:none">
+
+      <div class="duel-scoreboard">
+        <div class="ds-side" id="ds-p1">
+          <div class="ds-name" id="ds-p1-name">-</div>
+          <div class="ds-pts"  id="ds-p1-pts">0</div>
+        </div>
+        <div class="ds-mid">
+          <div style="font-size:20px">⚔️</div>
+          <div class="ds-target" id="ds-target">עד 15</div>
+        </div>
+        <div class="ds-side" id="ds-p2">
+          <div class="ds-name" id="ds-p2-name">-</div>
+          <div class="ds-pts"  id="ds-p2-pts">0</div>
+        </div>
+      </div>
+
+      <!-- 3a. My turn: pick a word to challenge -->
+      <div id="dp-pick" style="display:none">
+        <p class="dp-title">🎯 התור שלך! אתגר את <span id="dp-opp-name">...</span></p>
+        <div class="duel-lvl-row">
+          <button class="d-lvl-btn" data-dlvl="1" onclick="setDuelLevel(1)">🟢 בסיסי<small>2 נק׳</small></button>
+          <button class="d-lvl-btn" data-dlvl="2" onclick="setDuelLevel(2)">🟡 בינוני<small>3 נק׳</small></button>
+          <button class="d-lvl-btn" data-dlvl="3" onclick="setDuelLevel(3)">🔴 מתקדם<small>5 נק׳</small></button>
+        </div>
+        <div class="duel-word-preview">
+          <div class="dp-pick-en"  id="dp-pick-word">-</div>
+          <div class="dp-pick-pts" id="dp-pick-pts">2 נקודות</div>
+        </div>
+        <div class="duel-pick-actions">
+          <button class="dp-shuffle-btn" onclick="drawDuelWord()">🔀 מילה אחרת</button>
+          <button class="dp-fire-btn"    onclick="fireDuelChallenge()">🏹 שלח אתגר ←</button>
+        </div>
+      </div>
+
+      <!-- 3b. My turn: challenge sent, waiting for opponent to answer -->
+      <div id="dp-sent" style="display:none">
+        <div class="dp-center">
+          <div class="dp-big-icon">⏳</div>
+          <p class="dp-center-txt"><span id="dp-sent-name">...</span> מנסה לענות...</p>
+          <div class="dp-peek-box">
+            <div class="dp-peek-word"><span id="dp-peek-en">-</span> = <span id="dp-peek-he">-</span></div>
+            <div class="dp-peek-note">רק אתה רואה את התשובה 🤫</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3c. Opponent's turn: I need to answer -->
+      <div id="dp-answer" style="display:none">
+        <p class="dp-title">💪 <span id="dp-ans-from">...</span> מאתגר/ת אותך!</p>
+        <div class="dp-pts-badge" id="dp-ans-pts">3 נקודות</div>
+        <div class="dp-answer-word" id="dp-ans-word">analyze</div>
+        <div class="dp-opts" id="dp-options"></div>
+        <div class="dp-timer-wrap">
+          <div class="dp-timer-track"><div class="dp-timer-fill" id="dp-timer-fill"></div></div>
+          <span class="dp-timer-num" id="dp-timer-num">20</span>
+        </div>
+      </div>
+
+      <!-- 3d. Opponent's turn: waiting for them to pick -->
+      <div id="dp-their-pick" style="display:none">
+        <div class="dp-center">
+          <div class="dp-big-icon">🤔</div>
+          <p class="dp-center-txt"><span id="dp-their-name">...</span> בוחר/ת מילה לאתגר אותך...</p>
+        </div>
+      </div>
+
+      <!-- 3e. Round result -->
+      <div id="dp-result" style="display:none">
+        <div class="dp-result-emoji"    id="dp-res-emoji">🎉</div>
+        <div class="dp-result-headline" id="dp-res-headline">מעולה!</div>
+        <div class="dp-result-word"><b id="dp-res-en">-</b> = <span id="dp-res-he">-</span></div>
+        <div class="dp-result-pts"      id="dp-res-pts">+3 נקודות</div>
+        <div id="dp-res-action"></div>
+      </div>
+
+    </div>
+
+    <!-- 4. Game Over -->
+    <div id="dp-gameover" style="display:none">
+      <div class="dp-gameover">
+        <div class="dp-go-icon"  id="dp-go-icon">🏆</div>
+        <div class="dp-go-title" id="dp-go-title">-</div>
+        <div class="dp-go-score" id="dp-go-score">-</div>
+        <button class="duel-btn duel-btn-primary" id="dp-rematch-btn" onclick="duelRematch()">🔄 שחק שוב</button>
+        <button class="duel-btn"                                        onclick="closeDuel()">← חזור ללמידה</button>
       </div>
     </div>
 
@@ -1449,6 +1717,7 @@ function hideStats() {
 
 document.addEventListener('keydown', (e) => {
   if (document.getElementById('stats-screen').classList.contains('visible')) return;
+  if (document.getElementById('duel-screen').classList.contains('visible')) return;
   if (e.key === 'ArrowRight')  go(-1);
   else if (e.key === 'ArrowLeft') go(1);
   else if (e.key === ' ') { e.preventDefault(); flipCard(); }
@@ -1610,6 +1879,386 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     window.location.reload();
   });
+}
+
+// ══════════════════════════════════════════════════════
+// ⚔️  DUEL MODE — Firebase Realtime Database
+// ══════════════════════════════════════════════════════
+
+// ─── Firebase config ──────────────────────────────────
+// SETUP (חד פעמי):
+// 1. עבור ל: https://console.firebase.google.com/
+// 2. צור פרויקט → Project Settings → Add App → Web
+// 3. הפעל Realtime Database → Start in test mode
+// 4. העתק את ה-config הבא ומלא את הערכים:
+const FIREBASE_CFG = {
+  apiKey:            "PASTE_HERE",
+  authDomain:        "PASTE_HERE",
+  databaseURL:       "PASTE_HERE",
+  projectId:         "PASTE_HERE",
+  storageBucket:     "PASTE_HERE",
+  messagingSenderId: "PASTE_HERE",
+  appId:             "PASTE_HERE"
+};
+
+const DUEL_TARGET  = 15;
+const DUEL_PTS_MAP = { 1:2, 2:3, 3:5 };
+const DUEL_TIMER_S = 20;
+
+let db         = null;
+let roomRef    = null;
+let myRole     = null;   // 'p1' | 'p2'
+let myDuelName = '';
+let duelLevel  = 1;
+let duelWord   = null;
+let duelTimer  = null;
+
+// ─── Lazy-load Firebase SDK ───────────────────────────
+function loadFirebase() {
+  if (window.firebase && firebase.database) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s1 = document.createElement('script');
+    s1.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
+    s1.onload = () => {
+      const s2 = document.createElement('script');
+      s2.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js';
+      s2.onload = res; s2.onerror = rej;
+      document.head.appendChild(s2);
+    };
+    s1.onerror = rej;
+    document.head.appendChild(s1);
+  });
+}
+
+function initDB() {
+  if (db) return;
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CFG);
+  db = firebase.database();
+}
+
+// ─── Navigation ───────────────────────────────────────
+function openDuel() {
+  if (FIREBASE_CFG.apiKey === 'PASTE_HERE') {
+    showToast('⚠️ צריך להגדיר Firebase — ראה הנחיות בקוד');
+    return;
+  }
+  loadFirebase().then(() => {
+    initDB();
+    document.getElementById('main-screen').classList.add('hidden');
+    document.getElementById('duel-screen').classList.add('visible');
+    showDP('dp-lobby');
+    const saved = localStorage.getItem('duel_name') || '';
+    document.getElementById('duel-my-name').value = saved;
+    const p = new URLSearchParams(location.search);
+    if (p.get('room')) document.getElementById('duel-code-input').value = p.get('room').toUpperCase();
+  }).catch(() => showToast('דו-קרב דורש אינטרנט 🌐'));
+}
+
+function closeDuel() {
+  leaveRoom();
+  document.getElementById('duel-screen').classList.remove('visible');
+  document.getElementById('main-screen').classList.remove('hidden');
+  // Clean URL
+  if (history.replaceState) history.replaceState({}, '', location.pathname);
+}
+
+function showDP(id) {
+  ['dp-lobby','dp-waiting','dp-game','dp-gameover'].forEach(p =>
+    document.getElementById(p).style.display = (p === id ? '' : 'none')
+  );
+}
+
+function showGP(id) {
+  ['dp-pick','dp-sent','dp-answer','dp-their-pick','dp-result'].forEach(p =>
+    document.getElementById(p).style.display = (p === id ? '' : 'none')
+  );
+}
+
+// ─── Create / Join ────────────────────────────────────
+function genRoomCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  return Array.from({length:4}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+async function createRoom() {
+  const name = document.getElementById('duel-my-name').value.trim();
+  if (!name) { showToast('הכנס שם 😊'); return; }
+  localStorage.setItem('duel_name', name);
+  myDuelName = name; myRole = 'p1';
+  const code = genRoomCode();
+  roomRef = db.ref('duels/' + code);
+  await roomRef.set({
+    state:'waiting', target:DUEL_TARGET,
+    p1:{name, score:0}, p2:null,
+    turn:'p1', challenge:null, ts:Date.now()
+  });
+  roomRef.onDisconnect().remove(); // auto-cleanup on disconnect
+  document.getElementById('dp-room-code').textContent = code;
+  showDP('dp-waiting');
+  roomRef.on('value', onRoom);
+}
+
+async function joinRoom() {
+  const name = document.getElementById('duel-my-name').value.trim();
+  const code = document.getElementById('duel-code-input').value.trim().toUpperCase();
+  if (!name)         { showToast('הכנס שם 😊'); return; }
+  if (code.length!==4){ showToast('קוד חדר: 4 אותיות'); return; }
+  localStorage.setItem('duel_name', name);
+  myDuelName = name; myRole = 'p2';
+  roomRef = db.ref('duels/' + code);
+  const snap = await roomRef.once('value');
+  const room = snap.val();
+  if (!room)                    { showToast('חדר לא קיים 🤷'); myRole=null; return; }
+  if (room.state !== 'waiting') { showToast('המשחק כבר התחיל'); myRole=null; return; }
+  if (room.p2)                  { showToast('החדר מלא'); myRole=null; return; }
+  await roomRef.update({ p2:{name, score:0}, state:'playing' });
+  showDP('dp-game');
+  roomRef.on('value', onRoom);
+}
+
+function leaveRoom() {
+  if (roomRef) { roomRef.off(); roomRef = null; }
+  stopDuelTimer(); myRole = null; duelWord = null;
+}
+
+// ─── Room update listener (the whole game logic) ──────
+function onRoom(snap) {
+  const r = snap.val(); if (!r) return;
+  const opp = myRole === 'p1' ? 'p2' : 'p1';
+
+  // P1 sees P2 joined → move from waiting to game
+  if (r.state === 'playing' && document.getElementById('dp-waiting').style.display !== 'none') {
+    showDP('dp-game');
+  }
+  if (r.state === 'finished') { stopDuelTimer(); showGameOver(r); return; }
+  if (r.state !== 'playing')  return;
+
+  showDP('dp-game');
+  updateDuelScoreboard(r);
+
+  const ch = r.challenge;
+  const iAmChallenger = r.turn === myRole;
+
+  if (!ch || ch.state === 'picking') {
+    // Pick phase
+    stopDuelTimer();
+    if (iAmChallenger) {
+      document.getElementById('dp-opp-name').textContent = r[opp].name;
+      if (!duelWord) { duelLevel=1; drawDuelWord(); setDuelLevelUI(1); }
+      showGP('dp-pick');
+    } else {
+      document.getElementById('dp-their-name').textContent = r[r.turn].name;
+      showGP('dp-their-pick');
+    }
+  } else if (ch.state === 'pending') {
+    if (!iAmChallenger) {
+      // I answer
+      document.getElementById('dp-ans-from').textContent = r[r.turn].name;
+      document.getElementById('dp-ans-pts').textContent  = ch.points + ' נקודות';
+      document.getElementById('dp-ans-word').textContent = ch.word.en;
+      renderDuelOptions(ch.options, ch.word.he);
+      showGP('dp-answer');
+      startDuelTimer(DUEL_TIMER_S, () => submitDuelAnswer(null, ch.word.he));
+    } else {
+      // I wait
+      document.getElementById('dp-sent-name').textContent = r[opp].name;
+      document.getElementById('dp-peek-en').textContent   = ch.word.en;
+      document.getElementById('dp-peek-he').textContent   = ch.word.he;
+      stopDuelTimer();
+      showGP('dp-sent');
+    }
+  } else if (ch.state === 'answered') {
+    stopDuelTimer();
+    showRoundResult(r, ch);
+  }
+}
+
+// ─── Scoreboard ───────────────────────────────────────
+function updateDuelScoreboard(r) {
+  if (!r.p1 || !r.p2) return;
+  document.getElementById('ds-p1-name').textContent = r.p1.name;
+  document.getElementById('ds-p1-pts' ).textContent = r.p1.score;
+  document.getElementById('ds-p2-name').textContent = r.p2.name;
+  document.getElementById('ds-p2-pts' ).textContent = r.p2.score;
+  document.getElementById('ds-target' ).textContent = 'עד ' + r.target;
+  document.getElementById('ds-p1').classList.toggle('active-turn', r.turn==='p1');
+  document.getElementById('ds-p2').classList.toggle('active-turn', r.turn==='p2');
+}
+
+// ─── Pick phase ───────────────────────────────────────
+function setDuelLevel(lvl) {
+  duelLevel = lvl; setDuelLevelUI(lvl); drawDuelWord();
+}
+
+function setDuelLevelUI(lvl) {
+  document.querySelectorAll('.d-lvl-btn').forEach(b => {
+    const bl = parseInt(b.dataset.dlvl);
+    b.className = 'd-lvl-btn' + (bl===lvl ? ' sel-'+bl : '');
+  });
+}
+
+function drawDuelWord() {
+  const pool = WORDS.filter(w => w.level === duelLevel);
+  duelWord = pool[Math.floor(Math.random() * pool.length)];
+  document.getElementById('dp-pick-word').textContent = duelWord?.en || '-';
+  document.getElementById('dp-pick-pts' ).textContent = DUEL_PTS_MAP[duelLevel] + ' נקודות';
+}
+
+async function fireDuelChallenge() {
+  if (!duelWord) return;
+  const opts = makeDuelOptions(duelWord.he, duelLevel);
+  await roomRef.update({ challenge:{
+    word:{ en:duelWord.en, he:duelWord.he, level:duelLevel },
+    points: DUEL_PTS_MAP[duelLevel],
+    options: opts, state:'pending', answer:null, correct:null
+  }});
+  duelWord = null;
+}
+
+function makeDuelOptions(correctHe, level) {
+  const pool = WORDS.filter(w => w.level===level && w.he!==correctHe);
+  const wrong = pool.sort(() => Math.random()-0.5).slice(0,3).map(w => w.he);
+  return [...wrong, correctHe].sort(() => Math.random()-0.5);
+}
+
+// ─── Answer phase ─────────────────────────────────────
+function renderDuelOptions(opts, correctHe) {
+  const el = document.getElementById('dp-options');
+  el.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'dp-opt'; btn.textContent = opt;
+    btn.onclick = () => submitDuelAnswer(opt, correctHe);
+    el.appendChild(btn);
+  });
+}
+
+async function submitDuelAnswer(chosen, correctHe) {
+  stopDuelTimer();
+  document.querySelectorAll('.dp-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correctHe)  b.classList.add('correct');
+    else if (b.textContent === chosen) b.classList.add('wrong');
+  });
+  const correct = (chosen === correctHe);
+  await new Promise(r => setTimeout(r, 700));
+  const snap = await roomRef.once('value');
+  const room = snap.val();
+  if (!room?.challenge || room.challenge.state !== 'pending') return;
+  await roomRef.update({
+    'challenge/state'  : 'answered',
+    'challenge/answer' : chosen || '',
+    'challenge/correct': correct
+  });
+}
+
+// ─── Round result ─────────────────────────────────────
+function showRoundResult(r, ch) {
+  showGP('dp-result');
+  const challengerRole = r.turn;
+  const defenderRole   = challengerRole==='p1' ? 'p2' : 'p1';
+  const winnerRole     = ch.correct ? defenderRole : challengerRole;
+  const winnerName     = r[winnerRole].name;
+
+  document.getElementById('dp-res-emoji'   ).textContent = ch.correct ? '🎉' : '😅';
+  document.getElementById('dp-res-headline').textContent = ch.correct
+    ? `${r[defenderRole].name} ידע/ה! 🎊`
+    : `${r[defenderRole].name} לא ידע/ה 😬`;
+  document.getElementById('dp-res-en' ).textContent = ch.word.en;
+  document.getElementById('dp-res-he' ).textContent = ch.word.he;
+  document.getElementById('dp-res-pts').textContent = `+${ch.points} נקודות ל${winnerName}`;
+
+  const area = document.getElementById('dp-res-action');
+  if (myRole === challengerRole) {
+    // The challenger controls pacing
+    area.innerHTML = `<button class="dp-next-btn" onclick="advanceDuelTurn()">הסיבוב הבא →</button>`;
+  } else {
+    area.innerHTML = `<p style="text-align:center;color:#475569;font-size:14px;margin-top:20px">
+      ${r[challengerRole].name} ממשיך/ה...</p>`;
+  }
+}
+
+async function advanceDuelTurn() {
+  const snap = await roomRef.once('value');
+  const r = snap.val(); if (!r?.challenge) return;
+  const ch = r.challenge;
+  const challengerRole = r.turn;
+  const defenderRole   = challengerRole==='p1' ? 'p2' : 'p1';
+  const winnerRole     = ch.correct ? defenderRole : challengerRole;
+
+  const p1Score = r.p1.score + (winnerRole==='p1' ? ch.points : 0);
+  const p2Score = r.p2.score + (winnerRole==='p2' ? ch.points : 0);
+  const done    = p1Score>=r.target || p2Score>=r.target;
+
+  await roomRef.update({
+    'p1/score': p1Score, 'p2/score': p2Score,
+    turn: defenderRole,  // roles flip each round
+    challenge: null,
+    state: done ? 'finished' : 'playing'
+  });
+  duelWord = null;
+}
+
+// ─── Game Over ────────────────────────────────────────
+function showGameOver(r) {
+  showDP('dp-gameover');
+  const p1Won  = r.p1.score >= r.p2.score;
+  const winner = p1Won ? r.p1 : r.p2;
+  const iWon   = (p1Won && myRole==='p1') || (!p1Won && myRole==='p2');
+  document.getElementById('dp-go-icon' ).textContent = iWon ? '🏆' : '😔';
+  document.getElementById('dp-go-title').textContent = `${winner.name} ניצח/ה!`;
+  document.getElementById('dp-go-score').textContent = `${r.p1.score} — ${r.p2.score}`;
+  document.getElementById('dp-rematch-btn').style.display = myRole==='p1' ? '' : 'none';
+}
+
+async function duelRematch() {
+  if (myRole !== 'p1') return;
+  await roomRef.update({
+    state:'playing', turn:'p1', challenge:null,
+    'p1/score':0, 'p2/score':0
+  });
+  duelWord = null;
+}
+
+// ─── Sharing ──────────────────────────────────────────
+function shareRoom() {
+  const code = document.getElementById('dp-room-code').textContent;
+  const url  = `${location.origin}${location.pathname}?room=${code}`;
+  const text = `${myDuelName} מזמין/ת אותך לדו-קרב מילים! ⚔️\nקוד חדר: ${code}\n${url}`;
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => {});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+}
+
+function copyRoomLink() {
+  const code = document.getElementById('dp-room-code').textContent;
+  const url  = `${location.origin}${location.pathname}?room=${code}`;
+  navigator.clipboard.writeText(url).then(() => showToast('הקישור הועתק ✓'));
+}
+
+// ─── Timer ────────────────────────────────────────────
+function startDuelTimer(sec, onEnd) {
+  stopDuelTimer();
+  let left = sec;
+  const fill = document.getElementById('dp-timer-fill');
+  const num  = document.getElementById('dp-timer-num');
+  if (fill) fill.style.width = '100%';
+  if (num)  num.textContent  = left;
+  duelTimer = setInterval(() => {
+    left--;
+    if (num)  num.textContent = left;
+    if (fill) {
+      fill.style.width  = (left/sec*100) + '%';
+      fill.style.background = left <= 5 ? '#ef4444' : '#3b82f6';
+    }
+    if (left <= 0) { stopDuelTimer(); onEnd(); }
+  }, 1000);
+}
+
+function stopDuelTimer() {
+  if (duelTimer) { clearInterval(duelTimer); duelTimer = null; }
 }
 
 // ── Init ──────────────────────────────────────
