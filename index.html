@@ -1964,28 +1964,80 @@ function openDuel() {
     initDB();
     document.getElementById('main-screen').classList.add('hidden');
     document.getElementById('duel-screen').classList.add('visible');
-    showDP('dp-lobby');
-    const saved = localStorage.getItem('duel_name') || '';
-    document.getElementById('duel-my-name').value = saved;
-    const p = new URLSearchParams(location.search);
-    const roomCode = p.get('room');
+
+    const savedName = localStorage.getItem('duel_name') || '';
+    const p        = new URLSearchParams(location.search);
+    const roomCode = (p.get('room') || '').toUpperCase();
+
     if (roomCode) {
-      const code = roomCode.toUpperCase();
-      document.getElementById('duel-code-input').value = code;
-      // הצג את אזור ההצטרפות הבולט
-      document.getElementById('dp-join-zone').style.display = '';
-      document.getElementById('dp-join-code-display').textContent = code;
-      document.getElementById('dp-manual-join').style.display = 'none';
-      document.getElementById('duel-my-name').focus();
+      // ── נכנסנו דרך קישור ──
+      const myRoom = localStorage.getItem('duel_my_room');
+      if (myRoom === roomCode) {
+        // זה החדר שאני יצרתי — חזור אליו כיוצר
+        reconnectAsHost(roomCode, savedName);
+      } else if (savedName) {
+        // יש שם שמור — הצטרף אוטומטית
+        showDP('dp-lobby'); // רגע loading
+        autoJoin(roomCode, savedName);
+      } else {
+        // אין שם — בקש שם ואז הצטרף
+        showDP('dp-lobby');
+        document.getElementById('duel-my-name').value = '';
+        document.getElementById('duel-code-input').value = roomCode;
+        document.getElementById('dp-join-zone').style.display = '';
+        document.getElementById('dp-join-code-display').textContent = roomCode;
+        document.getElementById('dp-manual-join').style.display = 'none';
+        document.getElementById('duel-my-name').focus();
+      }
+    } else {
+      // ── לובי רגיל ──
+      showDP('dp-lobby');
+      document.getElementById('duel-my-name').value = savedName;
+      document.getElementById('dp-join-zone').style.display = 'none';
+      document.getElementById('dp-manual-join').style.display = '';
     }
   }).catch(() => showToast('דו-קרב דורש אינטרנט 🌐'));
+}
+
+// חזרה לחדר שיצרתי (אם נסגרתי ופתחתי שוב)
+async function reconnectAsHost(code, name) {
+  myDuelName = name || 'אנון'; myRole = 'p1';
+  roomRef = db.ref('duels/' + code);
+  const snap = await roomRef.once('value');
+  const room = snap.val();
+  if (!room) {
+    showToast('החדר לא קיים עוד');
+    localStorage.removeItem('duel_my_room');
+    showDP('dp-lobby');
+    return;
+  }
+  document.getElementById('dp-room-code').textContent = code;
+  if (room.state === 'waiting') showDP('dp-waiting');
+  else showDP('dp-game');
+  roomRef.on('value', onRoom);
+  showToast('🔄 חזרת לחדר ' + code);
+}
+
+// הצטרפות אוטומטית — ללא לחיצות
+async function autoJoin(code, name) {
+  myDuelName = name; myRole = 'p2';
+  localStorage.setItem('duel_name', name);
+  roomRef = db.ref('duels/' + code);
+  const snap = await roomRef.once('value');
+  const room = snap.val();
+  if (!room)  { showToast('חדר לא קיים — בקש קוד חדש 🤷'); showDP('dp-lobby'); myRole=null; return; }
+  if (Date.now() - room.ts > 2*60*60*1000) { showToast('החדר פג תוקף'); showDP('dp-lobby'); myRole=null; return; }
+  if (room.state !== 'waiting') { showToast('המשחק כבר התחיל'); showDP('dp-lobby'); myRole=null; return; }
+  if (room.p2)  { showToast('החדר מלא'); showDP('dp-lobby'); myRole=null; return; }
+  await roomRef.update({ p2:{name, score:0}, state:'playing' });
+  showDP('dp-game');
+  roomRef.on('value', onRoom);
 }
 
 function closeDuel() {
   leaveRoom();
   document.getElementById('duel-screen').classList.remove('visible');
   document.getElementById('main-screen').classList.remove('hidden');
-  // Clean URL
   if (history.replaceState) history.replaceState({}, '', location.pathname);
 }
 
@@ -2019,7 +2071,7 @@ async function createRoom() {
     p1:{name, score:0}, p2:null,
     turn:'p1', challenge:null, ts:Date.now()
   });
-  // לא מוחקים את החדר בניתוק — זה גרם לחדר להיעלם בלי סיבה
+  localStorage.setItem('duel_my_room', code); // זכור שזה החדר שלי
   document.getElementById('dp-room-code').textContent = code;
   showDP('dp-waiting');
   roomRef.on('value', onRoom);
@@ -2048,6 +2100,7 @@ async function joinRoom() {
 function leaveRoom() {
   if (roomRef) { roomRef.off(); roomRef = null; }
   stopDuelTimer(); myRole = null; duelWord = null;
+  localStorage.removeItem('duel_my_room'); // שכח את החדר שיצרתי
 }
 
 // ─── Room update listener (the whole game logic) ──────
