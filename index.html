@@ -801,6 +801,7 @@
         <div class="dp-timer-wrap">
           <div class="dp-timer-track"><div class="dp-timer-fill" id="dp-timer-fill"></div></div>
           <span class="dp-timer-num" id="dp-timer-num">20</span>
+          <span id="dp-live-pts" style="display:none;font-size:13px;color:#fbbf24;font-weight:700;white-space:nowrap;"></span>
         </div>
       </div>
 
@@ -1920,7 +1921,8 @@ const FIREBASE_CFG = {
 };
 
 const DUEL_TARGET  = 15;
-const DUEL_PTS_MAP = { 1:2, 2:3, 3:5 };
+const DUEL_MAX_PTS = { 1:3, 2:5, 3:7 }; // מקסימום נקודות לפי רמה (ענייה מהיר)
+const DUEL_MIN_PTS = { 1:1, 2:2, 3:3 }; // מינימום נקודות לפי רמה (ענייה איטי)
 const DUEL_TIMER_S = 20;
 
 let db         = null;
@@ -1930,6 +1932,7 @@ let myDuelName = '';
 let duelLevel  = 1;
 let duelWord   = null;
 let duelTimer  = null;
+let timerLeft  = 0;
 
 // ─── Lazy-load Firebase SDK ───────────────────────────
 function loadFirebase() {
@@ -2029,7 +2032,7 @@ async function autoJoin(code, name) {
   if (Date.now() - room.ts > 2*60*60*1000) { showToast('החדר פג תוקף'); showDP('dp-lobby'); myRole=null; return; }
   if (room.state !== 'waiting') { showToast('המשחק כבר התחיל'); showDP('dp-lobby'); myRole=null; return; }
   if (room.p2)  { showToast('החדר מלא'); showDP('dp-lobby'); myRole=null; return; }
-  await roomRef.update({ p2:{name, score:0}, state:'playing' });
+  await roomRef.update({ p2:{name, score:0, turns:0}, state:'playing' });
   showDP('dp-game');
   roomRef.on('value', onRoom);
 }
@@ -2068,7 +2071,7 @@ async function createRoom() {
   roomRef = db.ref('duels/' + code);
   await roomRef.set({
     state:'waiting', target:DUEL_TARGET,
-    p1:{name, score:0}, p2:null,
+    p1:{name, score:0, turns:0}, p2:null,
     turn:'p1', challenge:null, ts:Date.now()
   });
   localStorage.setItem('duel_my_room', code); // זכור שזה החדר שלי
@@ -2092,7 +2095,7 @@ async function joinRoom() {
   if (Date.now() - room.ts > 2*60*60*1000) { showToast('החדר פג תוקף — צור חדר חדש'); myRole=null; return; }
   if (room.state !== 'waiting') { showToast('המשחק כבר התחיל'); myRole=null; return; }
   if (room.p2)                  { showToast('החדר מלא'); myRole=null; return; }
-  await roomRef.update({ p2:{name, score:0}, state:'playing' });
+  await roomRef.update({ p2:{name, score:0, turns:0}, state:'playing' });
   showDP('dp-game');
   roomRef.on('value', onRoom);
 }
@@ -2136,11 +2139,11 @@ function onRoom(snap) {
     if (!iAmChallenger) {
       // I answer
       document.getElementById('dp-ans-from').textContent = r[r.turn].name;
-      document.getElementById('dp-ans-pts').textContent  = ch.points + ' נקודות';
+      document.getElementById('dp-ans-pts').textContent  = 'עד ' + (ch.maxPoints||3) + ' נקודות';
       document.getElementById('dp-ans-word').textContent = ch.word.en;
       renderDuelOptions(ch.options, ch.word.he);
       showGP('dp-answer');
-      startDuelTimer(DUEL_TIMER_S, () => submitDuelAnswer(null, ch.word.he));
+      startDuelTimer(DUEL_TIMER_S, () => submitDuelAnswer(null, ch.word.he), ch.maxPoints, ch.minPoints);
     } else {
       // I wait
       document.getElementById('dp-sent-name').textContent = r[opp].name;
@@ -2183,7 +2186,7 @@ function drawDuelWord() {
   const pool = WORDS.filter(w => w.level === duelLevel);
   duelWord = pool[Math.floor(Math.random() * pool.length)];
   document.getElementById('dp-pick-word').textContent = duelWord?.en || '-';
-  document.getElementById('dp-pick-pts' ).textContent = DUEL_PTS_MAP[duelLevel] + ' נקודות';
+  document.getElementById('dp-pick-pts' ).textContent = 'עד ' + DUEL_MAX_PTS[duelLevel] + ' נקודות';
 }
 
 async function fireDuelChallenge() {
@@ -2191,8 +2194,8 @@ async function fireDuelChallenge() {
   const opts = makeDuelOptions(duelWord.he, duelLevel);
   await roomRef.update({ challenge:{
     word:{ en:duelWord.en, he:duelWord.he, level:duelLevel },
-    points: DUEL_PTS_MAP[duelLevel],
-    options: opts, state:'pending', answer:null, correct:null
+    maxPoints: DUEL_MAX_PTS[duelLevel], minPoints: DUEL_MIN_PTS[duelLevel],
+    options: opts, state:'pending', answer:null, correct:null, timeLeft:null
   }});
   duelWord = null;
 }
@@ -2228,9 +2231,10 @@ async function submitDuelAnswer(chosen, correctHe) {
   const room = snap.val();
   if (!room?.challenge || room.challenge.state !== 'pending') return;
   await roomRef.update({
-    'challenge/state'  : 'answered',
-    'challenge/answer' : chosen || '',
-    'challenge/correct': correct
+    'challenge/state'   : 'answered',
+    'challenge/answer'  : chosen || '',
+    'challenge/correct' : correct,
+    'challenge/timeLeft': timerLeft
   });
 }
 
@@ -2239,8 +2243,19 @@ function showRoundResult(r, ch) {
   showGP('dp-result');
   const challengerRole = r.turn;
   const defenderRole   = challengerRole==='p1' ? 'p2' : 'p1';
-  const winnerRole     = ch.correct ? defenderRole : challengerRole;
-  const winnerName     = r[winnerRole].name;
+
+  // Calculate actual earned points (same logic as advanceDuelTurn)
+  let earnedPts;
+  if (ch.correct) {
+    const timeRatio = Math.max(0, Math.min(1, (ch.timeLeft || 0) / DUEL_TIMER_S));
+    const maxP = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
+    const minP = ch.minPoints || DUEL_MIN_PTS[ch.word?.level] || 1;
+    earnedPts = Math.round(minP + timeRatio * (maxP - minP));
+  } else {
+    earnedPts = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
+  }
+  const winnerRole = ch.correct ? defenderRole : challengerRole;
+  const winnerName = r[winnerRole].name;
 
   document.getElementById('dp-res-emoji'   ).textContent = ch.correct ? '🎉' : '😅';
   document.getElementById('dp-res-headline').textContent = ch.correct
@@ -2248,7 +2263,7 @@ function showRoundResult(r, ch) {
     : `${r[defenderRole].name} לא ידע/ה 😬`;
   document.getElementById('dp-res-en' ).textContent = ch.word.en;
   document.getElementById('dp-res-he' ).textContent = ch.word.he;
-  document.getElementById('dp-res-pts').textContent = `+${ch.points} נקודות ל${winnerName}`;
+  document.getElementById('dp-res-pts').textContent = `+${earnedPts} נקודות ל${winnerName}`;
 
   const area = document.getElementById('dp-res-action');
   if (myRole === challengerRole) {
@@ -2266,17 +2281,37 @@ async function advanceDuelTurn() {
   const ch = r.challenge;
   const challengerRole = r.turn;
   const defenderRole   = challengerRole==='p1' ? 'p2' : 'p1';
-  const winnerRole     = ch.correct ? defenderRole : challengerRole;
 
-  const p1Score = r.p1.score + (winnerRole==='p1' ? ch.points : 0);
-  const p2Score = r.p2.score + (winnerRole==='p2' ? ch.points : 0);
-  const done    = p1Score>=r.target || p2Score>=r.target;
+  // Dynamic scoring: scale between minPoints (slow) and maxPoints (fast)
+  let earnedPts;
+  if (ch.correct) {
+    // Defender answered correctly — reward speed
+    const timeRatio = Math.max(0, Math.min(1, (ch.timeLeft || 0) / DUEL_TIMER_S));
+    const maxP = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
+    const minP = ch.minPoints || DUEL_MIN_PTS[ch.word?.level] || 1;
+    earnedPts = Math.round(minP + timeRatio * (maxP - minP));
+  } else {
+    // Defender failed — challenger gets max points
+    earnedPts = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
+  }
+  const winnerRole = ch.correct ? defenderRole : challengerRole;
+
+  // Track how many turns each player has taken as challenger
+  const newP1Turns = (r.p1.turns || 0) + (challengerRole === 'p1' ? 1 : 0);
+  const newP2Turns = (r.p2.turns || 0) + (challengerRole === 'p2' ? 1 : 0);
+  const p1Score    = r.p1.score + (winnerRole === 'p1' ? earnedPts : 0);
+  const p2Score    = r.p2.score + (winnerRole === 'p2' ? earnedPts : 0);
+
+  // End only when both have had equal turns AND someone hit the target
+  const equalTurns = newP1Turns === newP2Turns;
+  const done       = equalTurns && (p1Score >= r.target || p2Score >= r.target);
 
   await roomRef.update({
-    'p1/score': p1Score, 'p2/score': p2Score,
-    turn: defenderRole,  // roles flip each round
-    challenge: null,
-    state: done ? 'finished' : 'playing'
+    'p1/score' : p1Score, 'p1/turns' : newP1Turns,
+    'p2/score' : p2Score, 'p2/turns' : newP2Turns,
+    turn      : defenderRole,
+    challenge : null,
+    state     : done ? 'finished' : 'playing'
   });
   duelWord = null;
 }
@@ -2321,19 +2356,32 @@ function copyRoomLink() {
 }
 
 // ─── Timer ────────────────────────────────────────────
-function startDuelTimer(sec, onEnd) {
+function startDuelTimer(sec, onEnd, maxPts, minPts) {
   stopDuelTimer();
   let left = sec;
-  const fill = document.getElementById('dp-timer-fill');
-  const num  = document.getElementById('dp-timer-num');
+  timerLeft = left;
+  const fill    = document.getElementById('dp-timer-fill');
+  const num     = document.getElementById('dp-timer-num');
+  const livePts = document.getElementById('dp-live-pts');
   if (fill) fill.style.width = '100%';
   if (num)  num.textContent  = left;
+  const hasPts = maxPts != null && minPts != null;
+  if (livePts) {
+    if (hasPts) { livePts.textContent = '⭐ ' + maxPts; livePts.style.display = ''; }
+    else        { livePts.style.display = 'none'; }
+  }
   duelTimer = setInterval(() => {
     left--;
+    timerLeft = left;
     if (num)  num.textContent = left;
     if (fill) {
-      fill.style.width  = (left/sec*100) + '%';
+      fill.style.width      = (left / sec * 100) + '%';
       fill.style.background = left <= 5 ? '#ef4444' : '#3b82f6';
+    }
+    if (livePts && hasPts) {
+      const ratio = Math.max(0, left / sec);
+      const pts   = Math.round(minPts + ratio * (maxPts - minPts));
+      livePts.textContent = '⭐ ' + pts;
     }
     if (left <= 0) { stopDuelTimer(); onEnd(); }
   }, 1000);
