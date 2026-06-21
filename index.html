@@ -604,10 +604,6 @@
       <h1>🎓 לומדים ונהנים</h1>
     </div>
     <div class="icon-bar">
-      <button class="nav-icon-btn" onclick="shuffleCards()">
-        <span class="nav-icon-emoji">🔀</span>
-        <span class="nav-icon-label">ערבב</span>
-      </button>
       <button class="nav-icon-btn" onclick="resetProgress()">
         <span class="nav-icon-emoji">↺</span>
         <span class="nav-icon-label">אפס</span>
@@ -1593,26 +1589,30 @@ function shuffle(arr) {
 }
 
 function applyLevelFilter() {
-  // "הכל" מציג רק רמות 1-3, ללא For Guy (רמה 0)
   const base = selectedLevel === 'all'
-    ? allCards.filter(c => c.level > 0)
+    ? allCards.filter(c => c.level > 0)   // הכל = רמות 1-3 בלבד
     : allCards.filter(c => c.level === selectedLevel);
-  filteredCards = reviewMode ? base.filter(c => unknown.has(c.en)) : base;
+  if (reviewMode) {
+    filteredCards = base.filter(c => unknown.has(c.en));   // רק אדומות
+  } else {
+    filteredCards = base.filter(c => !known.has(c.en));    // כל מה שעוד לא ידוע (ללא ירוקות)
+  }
   currentIndex = 0;
 }
 
 function render() {
   const card = filteredCards[currentIndex];
   if (!card) {
+    const doneMsg = reviewMode ? 'סיימת את כל המילים לחזרה! 🙌' : 'כל המילים ידועות! 🎉 לחץ "אפס" להתחיל מחדש';
+    document.getElementById('card').className = 'card' + (reviewMode ? '' : ' known');
+    document.getElementById('card-word').textContent = '🎉';
+    document.getElementById('card-hint').style.display = 'block';
+    document.getElementById('card-hint').textContent = doneMsg;
+    document.getElementById('card-translation').style.display = 'none';
+    document.getElementById('card-status').textContent = '';
+    document.getElementById('level-badge').textContent = '';
+    document.getElementById('card-counter').textContent = reviewMode ? 'כרטיס 0 מתוך 0' : '✓ הכל ידוע!';
     if (reviewMode) {
-      document.getElementById('card').className = 'card';
-      document.getElementById('card-word').textContent = '🎉';
-      document.getElementById('card-hint').style.display = 'block';
-      document.getElementById('card-hint').textContent = 'סיימת את כל המילים לחזרה!';
-      document.getElementById('card-translation').style.display = 'none';
-      document.getElementById('card-status').textContent = '';
-      document.getElementById('level-badge').textContent = '';
-      document.getElementById('card-counter').textContent = 'כרטיס 0 מתוך 0';
       document.getElementById('review-mode-bar').classList.add('visible');
       document.getElementById('review-banner').classList.remove('visible');
     }
@@ -1645,11 +1645,17 @@ function render() {
   else if (status === 'unknown') { statusEl.textContent = '✗ לחזרה'; statusEl.className = 'card-status unknown'; }
   else { statusEl.textContent = ''; statusEl.className = 'card-status'; }
 
-  const total = filteredCards.length;
-  const knownCount = filteredCards.filter(c => known.has(c.en)).length;
-  const pct = total > 0 ? Math.round((knownCount / total) * 100) : 0;
+  // חישוב progress מול כל הקלפים ברמה (לא רק הנשארות)
+  const levelBase = selectedLevel === 'all'
+    ? allCards.filter(c => c.level > 0)
+    : allCards.filter(c => c.level === selectedLevel);
+  const totalCards = levelBase.length;
+  const knownCount = levelBase.filter(c => known.has(c.en)).length;
+  const pct = totalCards > 0 ? Math.round((knownCount / totalCards) * 100) : 0;
 
-  document.getElementById('card-counter').textContent = `כרטיס ${currentIndex + 1} מתוך ${total}`;
+  document.getElementById('card-counter').textContent = reviewMode
+    ? `כרטיס ${currentIndex + 1} מתוך ${filteredCards.length}`
+    : `נשאר ${filteredCards.length} מתוך ${totalCards}`;
   document.getElementById('known-counter').textContent = `${knownCount} ידועות (${pct}%)`;
   document.getElementById('progress-fill').style.width = pct + '%';
 
@@ -1714,9 +1720,15 @@ function go(dir) {
 
 function markKnown() {
   const card = filteredCards[currentIndex];
+  if (!card) return;
   known.add(card.en);
   unknown.delete(card.en);
-  go(1);
+  saveProgress();
+  // הסר מיד את הכרטיסייה מהחפיסה (ירוקות לא מופיעות)
+  filteredCards.splice(currentIndex, 1);
+  if (currentIndex >= filteredCards.length) currentIndex = Math.max(0, filteredCards.length - 1);
+  isFlipped = false;
+  render();
 }
 
 function markUnknown() {
@@ -1736,7 +1748,9 @@ function shuffleCards() {
 function resetProgress() {
   known = new Set();
   unknown = new Set();
-  currentIndex = 0;
+  saveProgress();
+  reviewMode = false;
+  applyLevelFilter();
   isFlipped = false;
   render();
 }
