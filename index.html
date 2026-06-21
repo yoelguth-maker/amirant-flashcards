@@ -716,6 +716,7 @@
     <!-- Quiz card -->
     <div id="quiz-card" style="display:none">
       <div class="quiz-header">
+        <button class="quiz-back-btn" onclick="closeQuiz()" style="margin-left:0;margin-right:auto">← חזור</button>
         <span id="quiz-progress-text">שאלה 1 מתוך 10</span>
         <span class="quiz-score" id="quiz-score-display">✓ 0</span>
       </div>
@@ -1767,9 +1768,13 @@ function setLevel(lvl) {
 }
 
 function showStats() {
-  const total = filteredCards.length;
-  const knownWords = filteredCards.filter(c => known.has(c.en));
-  const unknownWords = filteredCards.filter(c => unknown.has(c.en));
+  // חישוב מול כל הכרטיסיות ברמה הנוכחית (לא filteredCards שמסנן ירוקות)
+  const levelBase = selectedLevel === 'all'
+    ? allCards.filter(c => c.level > 0)
+    : allCards.filter(c => c.level === selectedLevel);
+  const total = levelBase.length;
+  const knownWords   = levelBase.filter(c => known.has(c.en));
+  const unknownWords = levelBase.filter(c => unknown.has(c.en));
   const unseen = total - knownWords.length - unknownWords.length;
 
   document.getElementById('stat-known').textContent = knownWords.length;
