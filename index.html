@@ -766,9 +766,9 @@
       <div id="dp-pick" style="display:none">
         <p class="dp-title">🎯 התור שלך! אתגר את <span id="dp-opp-name">...</span></p>
         <div class="duel-lvl-row">
-          <button class="d-lvl-btn" data-dlvl="1" onclick="setDuelLevel(1)">🟢 בסיסי<small>2 נק׳</small></button>
-          <button class="d-lvl-btn" data-dlvl="2" onclick="setDuelLevel(2)">🟡 בינוני<small>3 נק׳</small></button>
-          <button class="d-lvl-btn" data-dlvl="3" onclick="setDuelLevel(3)">🔴 מתקדם<small>5 נק׳</small></button>
+          <button class="d-lvl-btn" data-dlvl="1" onclick="setDuelLevel(1)">🟢 בסיסי<small>1-2 נק׳</small></button>
+          <button class="d-lvl-btn" data-dlvl="2" onclick="setDuelLevel(2)">🟡 בינוני<small>2-3 נק׳</small></button>
+          <button class="d-lvl-btn" data-dlvl="3" onclick="setDuelLevel(3)">🔴 מתקדם<small>3-4 נק׳</small></button>
         </div>
         <div class="duel-word-preview">
           <div class="dp-pick-en"  id="dp-pick-word">-</div>
@@ -1920,10 +1920,12 @@ const FIREBASE_CFG = {
   appId:             "1:918490588900:web:4d74ec051bff726a302ef1"
 };
 
-const DUEL_TARGET  = 15;
-const DUEL_MAX_PTS = { 1:3, 2:5, 3:7 }; // מקסימום נקודות לפי רמה (ענייה מהיר)
-const DUEL_MIN_PTS = { 1:1, 2:2, 3:3 }; // מינימום נקודות לפי רמה (ענייה איטי)
-const DUEL_TIMER_S = 20;
+const DUEL_TARGET     = 12;
+const DUEL_BASE_PTS   = { 1:1, 2:2, 3:3 }; // נקודות בסיס לפי רמה
+const DUEL_MAX_PTS    = { 1:2, 2:3, 3:4 }; // עם בונוס מהירות
+const DUEL_MIN_PTS    = { 1:1, 2:2, 3:3 }; // ללא בונוס (alias for DUEL_BASE_PTS)
+const DUEL_BONUS_SECS = 5;                  // תשובה בתוך X שניות → +1 בונוס
+const DUEL_TIMER_S    = 20;
 
 let db         = null;
 let roomRef    = null;
@@ -2226,6 +2228,15 @@ async function submitDuelAnswer(chosen, correctHe) {
     else if (b.textContent === chosen) b.classList.add('wrong');
   });
   const correct = (chosen === correctHe);
+  // Track missed words in the flashcard unknown list
+  if (!correct) {
+    const wordEn = document.getElementById('dp-ans-word').textContent;
+    if (wordEn && wordEn !== '-') {
+      unknown.add(wordEn);
+      known.delete(wordEn);
+      saveProgress();
+    }
+  }
   await new Promise(r => setTimeout(r, 700));
   const snap = await roomRef.once('value');
   const room = snap.val();
@@ -2244,18 +2255,17 @@ function showRoundResult(r, ch) {
   const challengerRole = r.turn;
   const defenderRole   = challengerRole==='p1' ? 'p2' : 'p1';
 
-  // Calculate actual earned points (same logic as advanceDuelTurn)
-  let earnedPts;
-  if (ch.correct) {
-    const timeRatio = Math.max(0, Math.min(1, (ch.timeLeft || 0) / DUEL_TIMER_S));
-    const maxP = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
-    const minP = ch.minPoints || DUEL_MIN_PTS[ch.word?.level] || 1;
-    earnedPts = Math.round(minP + timeRatio * (maxP - minP));
-  } else {
-    earnedPts = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
-  }
-  const winnerRole = ch.correct ? defenderRole : challengerRole;
-  const winnerName = r[winnerRole].name;
+  const level  = ch.word?.level || 1;
+  const base   = DUEL_BASE_PTS[level] || 1;
+  const isFast = (ch.timeLeft != null) && (ch.timeLeft >= DUEL_TIMER_S - DUEL_BONUS_SECS);
+  const earnedPts  = ch.correct ? (base + (isFast ? 1 : 0)) : base; // base = penalty shown as positive
+  const winnerRole = ch.correct ? defenderRole : null;
+  const winnerName = ch.correct ? r[defenderRole].name : null;
+
+  const bonusTag = (ch.correct && isFast) ? ' ⚡ בונוס!' : '';
+  const ptsLine  = ch.correct
+    ? `+${earnedPts} נקודות ל${winnerName}${bonusTag}`
+    : `-${earnedPts} נקודות מ${r[defenderRole].name}`;
 
   document.getElementById('dp-res-emoji'   ).textContent = ch.correct ? '🎉' : '😅';
   document.getElementById('dp-res-headline').textContent = ch.correct
@@ -2263,7 +2273,7 @@ function showRoundResult(r, ch) {
     : `${r[defenderRole].name} לא ידע/ה 😬`;
   document.getElementById('dp-res-en' ).textContent = ch.word.en;
   document.getElementById('dp-res-he' ).textContent = ch.word.he;
-  document.getElementById('dp-res-pts').textContent = `+${earnedPts} נקודות ל${winnerName}`;
+  document.getElementById('dp-res-pts').textContent = ptsLine;
 
   const area = document.getElementById('dp-res-action');
   if (myRole === challengerRole) {
@@ -2282,25 +2292,20 @@ async function advanceDuelTurn() {
   const challengerRole = r.turn;
   const defenderRole   = challengerRole==='p1' ? 'p2' : 'p1';
 
-  // Dynamic scoring: scale between minPoints (slow) and maxPoints (fast)
-  let earnedPts;
-  if (ch.correct) {
-    // Defender answered correctly — reward speed
-    const timeRatio = Math.max(0, Math.min(1, (ch.timeLeft || 0) / DUEL_TIMER_S));
-    const maxP = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
-    const minP = ch.minPoints || DUEL_MIN_PTS[ch.word?.level] || 1;
-    earnedPts = Math.round(minP + timeRatio * (maxP - minP));
-  } else {
-    // Defender failed — challenger gets max points
-    earnedPts = ch.maxPoints || DUEL_MAX_PTS[ch.word?.level] || 3;
-  }
-  const winnerRole = ch.correct ? defenderRole : challengerRole;
+  const level  = ch.word?.level || 1;
+  const isFast = (ch.timeLeft != null) && (ch.timeLeft >= DUEL_TIMER_S - DUEL_BONUS_SECS);
+  const base   = DUEL_BASE_PTS[level] || 1;
 
-  // Track how many turns each player has taken as challenger
+  // Correct: defender earns base + speed bonus; Wrong: defender loses base pts (floor 0)
+  const defDelta = ch.correct ? (base + (isFast ? 1 : 0)) : -base;
+  const p1Delta  = challengerRole === 'p1' ? 0 : defDelta;
+  const p2Delta  = challengerRole === 'p1' ? defDelta : 0;
+
+  // Track turns and apply score changes (floor at 0)
   const newP1Turns = (r.p1.turns || 0) + (challengerRole === 'p1' ? 1 : 0);
   const newP2Turns = (r.p2.turns || 0) + (challengerRole === 'p2' ? 1 : 0);
-  const p1Score    = r.p1.score + (winnerRole === 'p1' ? earnedPts : 0);
-  const p2Score    = r.p2.score + (winnerRole === 'p2' ? earnedPts : 0);
+  const p1Score    = Math.max(0, r.p1.score + p1Delta);
+  const p2Score    = Math.max(0, r.p2.score + p2Delta);
 
   // End only when both have had equal turns AND someone hit the target
   const equalTurns = newP1Turns === newP2Turns;
@@ -2367,7 +2372,7 @@ function startDuelTimer(sec, onEnd, maxPts, minPts) {
   if (num)  num.textContent  = left;
   const hasPts = maxPts != null && minPts != null;
   if (livePts) {
-    if (hasPts) { livePts.textContent = '⭐ ' + maxPts; livePts.style.display = ''; }
+    if (hasPts) { livePts.textContent = '⚡ ' + maxPts; livePts.style.color = '#fbbf24'; livePts.style.display = ''; }
     else        { livePts.style.display = 'none'; }
   }
   duelTimer = setInterval(() => {
@@ -2379,9 +2384,9 @@ function startDuelTimer(sec, onEnd, maxPts, minPts) {
       fill.style.background = left <= 5 ? '#ef4444' : '#3b82f6';
     }
     if (livePts && hasPts) {
-      const ratio = Math.max(0, left / sec);
-      const pts   = Math.round(minPts + ratio * (maxPts - minPts));
-      livePts.textContent = '⭐ ' + pts;
+      const fast = left >= sec - DUEL_BONUS_SECS;
+      livePts.textContent = (fast ? '⚡' : '⭐') + ' ' + (fast ? maxPts : minPts);
+      livePts.style.color = fast ? '#fbbf24' : '#64748b';
     }
     if (left <= 0) { stopDuelTimer(); onEnd(); }
   }, 1000);
