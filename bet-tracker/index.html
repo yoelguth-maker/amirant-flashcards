@@ -1,364 +1,439 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="he">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🎯 התערבות בין חברים</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
-    input, textarea, button { font-family: inherit; }
-    ::placeholder { color: #64748b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e0a3c 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #fff;
+      direction: rtl;
+    }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+
+    #setup { padding-top: 40px; }
+    .logo { text-align: center; margin-bottom: 30px; }
+    .logo .emoji { font-size: 56px; }
+    .logo h1 { font-size: 26px; font-weight: 900; margin-top: 8px; }
+    .logo p { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .card label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #e2e8f0;
+    }
+    textarea, input[type=text] {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      direction: rtl;
+    }
+    textarea { resize: none; }
+    textarea:focus, input[type=text]:focus { border-color: #a855f7; }
+
+    .player-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .player-row input { flex: 1; }
+    .btn-add {
+      background: #7c3aed; border: none; border-radius: 12px;
+      color: #fff; font-size: 22px; width: 44px; cursor: pointer;
+    }
+    .btn-add:hover { background: #6d28d9; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: flex; align-items: center; gap: 6px;
+      border-radius: 999px; padding: 4px 12px;
+      font-size: 13px; font-weight: 600; color: #fff;
+    }
+    .chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: 16px; opacity: 0.8; }
+    .chip button:hover { opacity: 1; }
+
+    .counter-row { display: flex; align-items: center; gap: 16px; }
+    .btn-count {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: none;
+      color: #fff; font-size: 22px; cursor: pointer;
+    }
+    .btn-count:hover { background: rgba(255,255,255,0.2); }
+    .count-num { font-size: 38px; font-weight: 900; width: 50px; text-align: center; }
+    .count-info { color: #94a3b8; font-size: 12px; margin-top: 8px; }
+
+    .btn-start {
+      width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777);
+      border: none; border-radius: 16px; color: #fff;
+      font-size: 18px; font-weight: 900; padding: 16px; cursor: pointer;
+      margin-top: 4px; font-family: inherit;
+    }
+    .btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
+    .hint { text-align: center; color: #64748b; font-size: 12px; margin-top: 8px; }
+
+    #playing { padding-top: 20px; display: none; }
+
+    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .top-bar h2 { font-size: 17px; font-weight: 900; max-width: 85%; line-height: 1.4; }
+    .top-bar small { color: #94a3b8; font-size: 11px; display: block; margin-top: 3px; }
+    .btn-reset { background: none; border: none; color: #64748b; font-size: 22px; cursor: pointer; }
+    .btn-reset:hover { color: #ef4444; }
+
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
+    .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #db2777); border-radius: 99px; transition: width 0.4s; }
+
+    .standings { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
+    .standings-title { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { color: #64748b; font-size: 11px; padding: 8px 14px; text-align: right; }
+    tr + tr td { border-top: 1px solid rgba(255,255,255,0.05); }
+    td { padding: 10px 14px; }
+    .winner-row { background: rgba(234,179,8,0.05); }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; color: #fff; vertical-align: middle; margin-left: 8px;
+    }
+    .wins { color: #34d399; font-weight: 700; font-size: 15px; text-align: center; }
+    .losses { color: #f87171; font-weight: 700; font-size: 15px; text-align: center; }
+
+    .winner-banner {
+      background: linear-gradient(135deg, rgba(217,119,6,0.3), rgba(234,88,12,0.3));
+      border: 1px solid rgba(234,179,8,0.4);
+      border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px;
+    }
+    .winner-banner .trophy { font-size: 48px; margin-bottom: 6px; }
+    .winner-banner h3 { color: #fde68a; font-size: 20px; }
+    .winner-banner p { color: #fbbf24; font-size: 13px; margin-top: 4px; }
+
+    .matchup {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; margin-bottom: 10px; overflow: hidden;
+    }
+    .matchup-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+    .player-side { display: flex; align-items: center; gap: 8px; }
+    .player-side.rev { flex-direction: row-reverse; }
+    .player-name { font-weight: 700; font-size: 14px; }
+    .score-num { font-size: 22px; font-weight: 900; }
+    .sw { color: #34d399; } .sl { color: #f87171; } .st { color: #94a3b8; }
+    .vs { color: #475569; font-size: 11px; font-weight: 700; }
+
+    .dots { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; }
+    .dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; color: #fff;
+    }
+    .dot-empty { background: rgba(255,255,255,0.1); }
+
+    .matchup-actions { border-top: 1px solid rgba(255,255,255,0.08); display: flex; }
+    .btn-win {
+      flex: 1; padding: 12px 8px; background: none; border: none;
+      color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit;
+    }
+    .btn-win:first-child { border-left: 1px solid rgba(255,255,255,0.08); }
+    .btn-win:hover { background: rgba(255,255,255,0.08); }
+    .dot-sm { width: 14px; height: 14px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .btn-undo {
+      border-right: 1px solid rgba(255,255,255,0.08);
+      background: none; border-top: none; border-bottom: none; border-left: none;
+      color: #64748b; padding: 12px 14px; cursor: pointer; font-size: 18px;
+    }
+    .btn-undo:hover { color: #fff; }
+
+    .done-bar {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
+    }
+    .done-label { color: #94a3b8; font-size: 11px; }
+    .done-score { font-size: 13px; font-weight: 700; }
+    .done-undo { background: none; border: none; color: #475569; cursor: pointer; font-size: 16px; }
+    .done-undo:hover { color: #94a3b8; }
+
+    .c0{background:#3b82f6}.c1{background:#a855f7}.c2{background:#10b981}
+    .c3{background:#f97316}.c4{background:#ec4899}.c5{background:#06b6d4}
+    .c6{background:#eab308}.c7{background:#ef4444}
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
 
-    const STORAGE_KEY = 'friends-bet-tracker-v1';
+<div id="setup" class="container">
+  <div class="logo">
+    <div class="emoji">🎯</div>
+    <h1>התערבות בין חברים</h1>
+    <p>הגדר · שחק · נצח</p>
+  </div>
+  <div class="card">
+    <label>🏆 מה ההימור?</label>
+    <textarea id="goalInput" rows="2" placeholder="למשל: המפסיד שוטף את החדר"></textarea>
+  </div>
+  <div class="card">
+    <label>👥 משתתפים (<span id="playerCount">0</span>)</label>
+    <div class="player-row">
+      <input type="text" id="playerInput" placeholder="שם שחקן..." />
+      <button class="btn-add" id="addBtn">+</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="card">
+    <label>🎮 כמה משחקים כל אחד מול כל אחד?</label>
+    <div class="counter-row">
+      <button class="btn-count" id="gpmMinus">−</button>
+      <div class="count-num" id="gpmDisplay">5</div>
+      <button class="btn-count" id="gpmPlus">+</button>
+    </div>
+    <div class="count-info" id="countInfo"></div>
+  </div>
+  <button class="btn-start" id="startBtn" disabled>יאללה נתחיל! 🚀</button>
+  <div class="hint" id="startHint">צריך לפחות 2 שחקנים</div>
+</div>
 
-    const PLAYER_COLORS = [
-      'bg-blue-500', 'bg-purple-500', 'bg-emerald-500', 'bg-orange-500',
-      'bg-pink-500', 'bg-cyan-500', 'bg-yellow-500', 'bg-red-500',
-    ];
+<div id="playing" class="container">
+  <div class="top-bar">
+    <div>
+      <h2 id="goalDisplay"></h2>
+      <small id="metaDisplay"></small>
+    </div>
+    <button class="btn-reset" id="resetBtn">↺</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span id="progText"></span>
+      <span id="progPct"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+  <div class="standings">
+    <div class="standings-title">🏆 טבלת דירוג</div>
+    <table>
+      <thead><tr>
+        <th style="width:36px">#</th><th>שחקן</th>
+        <th style="text-align:center">נצח</th><th style="text-align:center">הפסיד</th>
+      </tr></thead>
+      <tbody id="standingsBody"></tbody>
+    </table>
+  </div>
+  <div id="winnerBanner" style="display:none" class="winner-banner">
+    <div class="trophy">🏆</div>
+    <h3 id="winnerText"></h3>
+    <p id="winnerSub"></p>
+  </div>
+  <div id="matchupList"></div>
+</div>
 
-    const COLOR_HEX = {
-      'bg-blue-500': '#3b82f6', 'bg-purple-500': '#a855f7',
-      'bg-emerald-500': '#10b981', 'bg-orange-500': '#f97316',
-      'bg-pink-500': '#ec4899', 'bg-cyan-500': '#06b6d4',
-      'bg-yellow-500': '#eab308', 'bg-red-500': '#ef4444',
-    };
+<script>
+const COLORS = ['c0','c1','c2','c3','c4','c5','c6','c7'];
+const KEY = 'bet-tracker-v2';
 
-    function generateMatchups(players) {
-      const matchups = [];
-      for (let i = 0; i < players.length; i++)
-        for (let j = i + 1; j < players.length; j++)
-          matchups.push([players[i], players[j]]);
-      return matchups;
+let S = loadState();
+
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || '{}');
+    return { phase: d.phase||'setup', goal: d.goal||'', players: d.players||[], gpm: d.gpm||5, results: d.results||{} };
+  } catch { return { phase:'setup', goal:'', players:[], gpm:5, results:{} }; }
+}
+function saveState() { localStorage.setItem(KEY, JSON.stringify(S)); }
+
+function color(name) { return COLORS[S.players.indexOf(name) % COLORS.length]; }
+function avHtml(name) { return `<span class="avatar ${color(name)}">${name[0].toUpperCase()}</span>`; }
+
+function getMatchups() {
+  const m = [];
+  for (let i=0; i<S.players.length; i++)
+    for (let j=i+1; j<S.players.length; j++)
+      m.push([S.players[i], S.players[j]]);
+  return m;
+}
+
+function getStandings() {
+  const stats = {};
+  S.players.forEach(p => { stats[p] = {wins:0, losses:0}; });
+  getMatchups().forEach(([p1,p2]) => {
+    (S.results[p1+'__'+p2]||[]).forEach(w => {
+      if (w===p1){stats[p1].wins++;stats[p2].losses++;}
+      else if(w===p2){stats[p2].wins++;stats[p1].losses++;}
+    });
+  });
+  return S.players.map(p=>({name:p,...stats[p]})).sort((a,b)=>b.wins-a.wins||a.losses-b.losses);
+}
+
+function totalPlayed() { return Object.values(S.results).reduce((s,g)=>s+g.length,0); }
+
+// ── Wire up static buttons ──
+document.getElementById('addBtn').onclick = addPlayer;
+document.getElementById('playerInput').onkeydown = e => { if(e.key==='Enter') addPlayer(); };
+document.getElementById('gpmMinus').onclick = () => changeGpm(-1);
+document.getElementById('gpmPlus').onclick  = () => changeGpm(1);
+document.getElementById('startBtn').onclick = startGame;
+document.getElementById('resetBtn').onclick = resetGame;
+document.getElementById('goalInput').oninput = e => { S.goal=e.target.value; saveState(); updateSetupMeta(); };
+
+function addPlayer() {
+  const inp = document.getElementById('playerInput');
+  const name = inp.value.trim();
+  if (name && !S.players.includes(name)) {
+    S.players.push(name); inp.value=''; saveState(); renderChips(); updateSetupMeta();
+  }
+  inp.focus();
+}
+
+function removePlayer(name) {
+  S.players = S.players.filter(p=>p!==name); saveState(); renderChips(); updateSetupMeta();
+}
+
+function changeGpm(d) {
+  S.gpm = Math.max(1, Math.min(20, S.gpm+d));
+  document.getElementById('gpmDisplay').textContent = S.gpm;
+  saveState(); updateSetupMeta();
+}
+
+function renderChips() {
+  document.getElementById('playerCount').textContent = S.players.length;
+  document.getElementById('chips').innerHTML = S.players.map((p,i) =>
+    `<span class="chip ${COLORS[i%COLORS.length]}">${p} <button onclick="removePlayer('${escQ(p)}')">×</button></span>`
+  ).join('');
+}
+
+function updateSetupMeta() {
+  const m = getMatchups();
+  const info = S.players.length>=2 ? `${m.length} עימותים × ${S.gpm} משחקים = ${m.length*S.gpm} בסה"כ` : '';
+  document.getElementById('countInfo').textContent = info;
+  const ok = S.players.length>=2 && S.goal.trim();
+  document.getElementById('startBtn').disabled = !ok;
+  const hint = document.getElementById('startHint');
+  hint.style.display = ok ? 'none' : '';
+  hint.textContent = !S.goal.trim() ? 'חסר תיאור הימור' : 'צריך לפחות 2 שחקנים';
+}
+
+function escQ(s) { return s.replace(/'/g,"\\'"); }
+
+function startGame() {
+  S.phase='playing'; S.results={}; saveState(); renderGame();
+}
+
+function resetGame() {
+  if(!confirm('לאפס הכל?')) return;
+  S={phase:'setup',goal:'',players:[],gpm:5,results:{}}; saveState(); renderSetup();
+}
+
+function recordWin(p1,p2,winner) {
+  const key=p1+'__'+p2, cur=S.results[key]||[];
+  if(cur.length>=S.gpm) return;
+  S.results[key]=[...cur,winner]; saveState(); renderGame();
+}
+
+function undoLast(p1,p2) {
+  const key=p1+'__'+p2, cur=S.results[key]||[];
+  if(!cur.length) return;
+  S.results[key]=cur.slice(0,-1); saveState(); renderGame();
+}
+
+function renderSetup() {
+  document.getElementById('setup').style.display='';
+  document.getElementById('playing').style.display='none';
+  document.getElementById('goalInput').value=S.goal;
+  document.getElementById('gpmDisplay').textContent=S.gpm;
+  renderChips(); updateSetupMeta();
+}
+
+function renderGame() {
+  document.getElementById('setup').style.display='none';
+  document.getElementById('playing').style.display='';
+
+  document.getElementById('goalDisplay').textContent='🎯 '+S.goal;
+  document.getElementById('metaDisplay').textContent=S.players.length+' שחקנים · '+S.gpm+' משחקים לכל עימות';
+
+  const played=totalPlayed(), m=getMatchups(), total=m.length*S.gpm;
+  const pct=total>0?Math.round(played/total*100):0;
+  document.getElementById('progText').textContent=played+' / '+total+' משחקים';
+  document.getElementById('progPct').textContent=pct+'%';
+  document.getElementById('progFill').style.width=pct+'%';
+
+  const st=getStandings();
+  document.getElementById('standingsBody').innerHTML=st.map((s,i)=>`
+    <tr class="${i===0&&s.wins>0?'winner-row':''}">
+      <td>${i===0&&s.wins>0?'👑':'<span style="color:#64748b;font-weight:700">'+(i+1)+'</span>'}</td>
+      <td>${avHtml(s.name)} ${s.name}</td>
+      <td class="wins">${s.wins}</td>
+      <td class="losses">${s.losses}</td>
+    </tr>`).join('');
+
+  const isComplete=played===total&&total>0;
+  const banner=document.getElementById('winnerBanner');
+  if(isComplete){
+    banner.style.display='';
+    document.getElementById('winnerText').textContent='הטורניר הסתיים!';
+    document.getElementById('winnerSub').textContent=st[0].name+' ניצח עם '+st[0].wins+' ניצחונות!';
+  } else { banner.style.display='none'; }
+
+  document.getElementById('matchupList').innerHTML=m.map(([p1,p2])=>{
+    const key=p1+'__'+p2, games=S.results[key]||[];
+    const p1w=games.filter(w=>w===p1).length, p2w=games.filter(w=>w===p2).length;
+    const done=games.length>=S.gpm;
+    const sc1=p1w>p2w?'sw':p1w<p2w?'sl':'st';
+    const sc2=p2w>p1w?'sw':p2w<p1w?'sl':'st';
+
+    const dots=Array.from({length:S.gpm}).map((_,i)=>{
+      const w=games[i];
+      return w?`<div class="dot ${color(w)}">${w[0].toUpperCase()}</div>`:`<div class="dot dot-empty"></div>`;
+    }).join('');
+
+    let actions;
+    if(done){
+      const n1=p1w>p2w?'sw':'sl', n2=p2w>p1w?'sw':'sl';
+      actions=`<div class="done-bar">
+        <span class="done-label">הסתיים ✓</span>
+        <span class="done-score"><span class="${n1}">${p1}</span> <span style="color:#475569">${p1w}:${p2w}</span> <span class="${n2}">${p2}</span></span>
+        <button class="done-undo" onclick="undoLast('${escQ(p1)}','${escQ(p2)}')">↩</button>
+      </div>`;
+    } else {
+      const undo=games.length>0?`<button class="btn-undo" onclick="undoLast('${escQ(p1)}','${escQ(p2)}')">↩</button>`:'';
+      actions=`<div class="matchup-actions">
+        <button class="btn-win" onclick="recordWin('${escQ(p1)}','${escQ(p2)}','${escQ(p1)}')">
+          <span class="dot-sm ${color(p1)}"></span>${p1} ניצח
+        </button>
+        <button class="btn-win" onclick="recordWin('${escQ(p1)}','${escQ(p2)}','${escQ(p2)}')">
+          <span class="dot-sm ${color(p2)}"></span>${p2} ניצח
+        </button>
+        ${undo}
+      </div>`;
     }
 
-    function computeStandings(players, matchups, results) {
-      const stats = {};
-      players.forEach(p => { stats[p] = { wins: 0, losses: 0 }; });
-      matchups.forEach(([p1, p2]) => {
-        const games = results[`${p1}__${p2}`] || [];
-        games.forEach(w => {
-          if (w === p1) { stats[p1].wins++; stats[p2].losses++; }
-          else if (w === p2) { stats[p2].wins++; stats[p1].losses++; }
-        });
-      });
-      return players
-        .map(p => ({ name: p, ...stats[p] }))
-        .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
-    }
+    return `<div class="matchup">
+      <div class="matchup-header">
+        <div class="player-side">${avHtml(p1)}<span class="player-name">${p1}</span><span class="score-num ${sc1}">${p1w}</span></div>
+        <span class="vs">vs</span>
+        <div class="player-side rev">${avHtml(p2)}<span class="player-name">${p2}</span><span class="score-num ${sc2}">${p2w}</span></div>
+      </div>
+      <div class="dots">${dots}</div>
+      ${actions}
+    </div>`;
+  }).join('');
+}
 
-    function getColorClass(players, name) {
-      return PLAYER_COLORS[players.indexOf(name) % PLAYER_COLORS.length];
-    }
-
-    function Avatar({ players, name, large }) {
-      const cls = getColorClass(players, name);
-      const sz = large ? 'w-10 h-10 text-base' : 'w-7 h-7 text-xs';
-      return (
-        <span className={`${cls} ${sz} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>
-          {name[0].toUpperCase()}
-        </span>
-      );
-    }
-
-    function App() {
-      const [phase, setPhase] = useState('setup');
-      const [goal, setGoal] = useState('');
-      const [players, setPlayers] = useState([]);
-      const [input, setInput] = useState('');
-      const [gpm, setGpm] = useState(5);
-      const [results, setResults] = useState({});
-
-      useEffect(() => {
-        try {
-          const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          if (d.phase) {
-            setPhase(d.phase);
-            setGoal(d.goal || '');
-            setPlayers(d.players || []);
-            setGpm(d.gpm || 5);
-            setResults(d.results || {});
-          }
-        } catch {}
-      }, []);
-
-      useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ phase, goal, players, gpm, results }));
-      }, [phase, goal, players, gpm, results]);
-
-      const matchups = useMemo(() => generateMatchups(players), [players]);
-      const standings = useMemo(() => computeStandings(players, matchups, results), [players, matchups, results]);
-
-      const played = Object.values(results).reduce((s, g) => s + g.length, 0);
-      const total = matchups.length * gpm;
-      const pct = total > 0 ? Math.round((played / total) * 100) : 0;
-      const done = phase === 'playing' && played === total;
-
-      function addPlayer(e) {
-        e?.preventDefault();
-        const name = input.trim();
-        if (name && !players.includes(name)) { setPlayers(p => [...p, name]); setInput(''); }
-      }
-
-      function start() {
-        if (players.length < 2 || !goal.trim()) return;
-        setPhase('playing');
-        setResults({});
-      }
-
-      function win(p1, p2, winner) {
-        const key = `${p1}__${p2}`;
-        setResults(prev => {
-          const cur = prev[key] || [];
-          if (cur.length >= gpm) return prev;
-          return { ...prev, [key]: [...cur, winner] };
-        });
-      }
-
-      function undo(p1, p2) {
-        const key = `${p1}__${p2}`;
-        setResults(prev => {
-          const cur = prev[key] || [];
-          if (!cur.length) return prev;
-          return { ...prev, [key]: cur.slice(0, -1) };
-        });
-      }
-
-      function reset() {
-        if (!window.confirm('לאפס הכל ולהתחיל מחדש?')) return;
-        setPhase('setup'); setGoal(''); setPlayers([]); setGpm(5); setResults({});
-      }
-
-      /* ─── SETUP ─── */
-      if (phase === 'setup') return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-start justify-center p-4 pt-10">
-          <div className="w-full max-w-md">
-
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-3">🎯</div>
-              <h1 className="text-3xl font-extrabold text-white">התערבות בין חברים</h1>
-              <p className="text-slate-400 mt-1 text-sm">הגדר · שחק · נצח</p>
-            </div>
-
-            <div className="space-y-4">
-
-              {/* Goal */}
-              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
-                <div className="text-white font-semibold text-sm mb-2">🏆&nbsp; מה ההימור?</div>
-                <textarea
-                  value={goal}
-                  onChange={e => setGoal(e.target.value)}
-                  placeholder="למשל: המפסיד שוטף את החדר"
-                  rows={2}
-                  className="w-full bg-white/10 text-white rounded-xl px-4 py-3 text-sm resize-none outline-none border border-white/10 focus:border-purple-500"
-                />
-              </div>
-
-              {/* Players */}
-              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
-                <div className="text-white font-semibold text-sm mb-3">👥&nbsp; משתתפים ({players.length})</div>
-                <form onSubmit={addPlayer} className="flex gap-2 mb-3">
-                  <input
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    placeholder="שם שחקן..."
-                    className="flex-1 bg-white/10 text-white rounded-xl px-4 py-2.5 text-sm outline-none border border-white/10 focus:border-purple-500"
-                  />
-                  <button type="submit" className="bg-purple-600 hover:bg-purple-500 text-white rounded-xl px-5 py-2.5 font-bold text-xl transition-colors">+</button>
-                </form>
-                {players.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {players.map((p, i) => (
-                      <span key={p} className={`${PLAYER_COLORS[i % PLAYER_COLORS.length]} text-white text-sm rounded-full px-3 py-1 flex items-center gap-1.5`}>
-                        {p}
-                        <button onClick={() => setPlayers(ps => ps.filter(x => x !== p))} className="font-bold hover:opacity-70">×</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Games per matchup */}
-              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
-                <div className="text-white font-semibold text-sm mb-3">🎮&nbsp; כמה משחקים כל אחד מול כל אחד?</div>
-                <div className="flex items-center gap-5">
-                  <button onClick={() => setGpm(g => Math.max(1, g - 1))} className="w-11 h-11 rounded-full bg-white/10 text-white text-2xl font-bold hover:bg-white/20 transition-colors flex items-center justify-center">−</button>
-                  <span className="text-white text-4xl font-extrabold w-12 text-center">{gpm}</span>
-                  <button onClick={() => setGpm(g => Math.min(20, g + 1))} className="w-11 h-11 rounded-full bg-white/10 text-white text-2xl font-bold hover:bg-white/20 transition-colors flex items-center justify-center">+</button>
-                </div>
-                {players.length >= 2 && (
-                  <p className="text-slate-400 text-xs mt-3">
-                    {matchups.length} עימותים × {gpm} משחקים = סה"כ {matchups.length * gpm} משחקים
-                  </p>
-                )}
-              </div>
-
-              <button
-                onClick={start}
-                disabled={players.length < 2 || !goal.trim()}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-xl transition-all shadow-xl shadow-purple-900/50"
-              >
-                יאללה נתחיל! 🚀
-              </button>
-              {players.length < 2 && <p className="text-center text-slate-500 text-xs">צריך לפחות 2 שחקנים</p>}
-            </div>
-          </div>
-        </div>
-      );
-
-      /* ─── PLAYING ─── */
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 p-4">
-          <div className="max-w-2xl mx-auto">
-
-            {/* Header */}
-            <div className="flex items-start justify-between mb-5">
-              <div>
-                <h1 className="text-white font-extrabold text-xl leading-snug">🎯 {goal}</h1>
-                <p className="text-slate-400 text-xs mt-1">{players.length} שחקנים · {gpm} משחקים לכל עימות</p>
-              </div>
-              <button onClick={reset} title="אפס הכל" className="text-slate-500 hover:text-red-400 transition-colors text-2xl mt-1">↺</button>
-            </div>
-
-            {/* Progress */}
-            <div className="mb-6">
-              <div className="flex justify-between text-xs text-slate-400 mb-1.5">
-                <span>{played} / {total} משחקים</span>
-                <span>{pct}%</span>
-              </div>
-              <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500" style={{width: `${pct}%`}} />
-              </div>
-            </div>
-
-            {/* Standings */}
-            <div className="bg-white/5 rounded-2xl border border-white/10 mb-5 overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/10">
-                <span className="text-white font-bold text-sm">🏆 טבלת דירוג</span>
-              </div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-slate-500 text-xs border-b border-white/5">
-                    <th className="text-right px-4 py-2 w-10">#</th>
-                    <th className="text-right px-4 py-2">שחקן</th>
-                    <th className="text-center px-3 py-2 text-emerald-600">נצח</th>
-                    <th className="text-center px-3 py-2 text-red-600">הפסיד</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {standings.map((s, i) => (
-                    <tr key={s.name} className={`border-t border-white/5 ${i === 0 && s.wins > 0 ? 'bg-yellow-500/5' : ''}`}>
-                      <td className="px-4 py-3 text-center">{i === 0 && s.wins > 0 ? <span className="text-lg">👑</span> : <span className="text-slate-500 font-bold">{i + 1}</span>}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <Avatar players={players} name={s.name} />
-                          <span className="text-white font-semibold">{s.name}</span>
-                        </div>
-                      </td>
-                      <td className="text-center px-3 py-3"><span className="text-emerald-400 font-bold text-base">{s.wins}</span></td>
-                      <td className="text-center px-3 py-3"><span className="text-red-400 font-bold text-base">{s.losses}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Winner banner */}
-            {done && (
-              <div className="bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border border-yellow-500/40 rounded-2xl p-5 mb-5 text-center">
-                <div className="text-5xl mb-2">🏆</div>
-                <p className="text-yellow-200 font-extrabold text-xl">הטורניר הסתיים!</p>
-                <p className="text-yellow-400 text-sm mt-1">{standings[0]?.name} ניצח עם {standings[0]?.wins} ניצחונות!</p>
-              </div>
-            )}
-
-            {/* Matchups */}
-            <div className="space-y-3">
-              {matchups.map(([p1, p2]) => {
-                const key = `${p1}__${p2}`;
-                const games = results[key] || [];
-                const p1w = games.filter(w => w === p1).length;
-                const p2w = games.filter(w => w === p2).length;
-                const matchDone = games.length >= gpm;
-
-                return (
-                  <div key={key} className={`bg-white/5 rounded-2xl border overflow-hidden ${matchDone ? 'border-white/20' : 'border-white/10'}`}>
-
-                    {/* Score header */}
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <Avatar players={players} name={p1} />
-                        <span className="text-white font-bold">{p1}</span>
-                        <span className={`font-extrabold text-xl ${p1w > p2w ? 'text-emerald-400' : p1w < p2w ? 'text-red-400' : 'text-slate-400'}`}>{p1w}</span>
-                      </div>
-                      <span className="text-slate-600 text-xs font-bold">vs</span>
-                      <div className="flex items-center gap-2 flex-row-reverse">
-                        <Avatar players={players} name={p2} />
-                        <span className="text-white font-bold">{p2}</span>
-                        <span className={`font-extrabold text-xl ${p2w > p1w ? 'text-emerald-400' : p2w < p1w ? 'text-red-400' : 'text-slate-400'}`}>{p2w}</span>
-                      </div>
-                    </div>
-
-                    {/* Game dots */}
-                    <div className="px-4 pb-3 flex flex-wrap gap-2">
-                      {Array.from({ length: gpm }).map((_, i) => {
-                        const w = games[i];
-                        const cls = w ? getColorClass(players, w) : 'bg-white/10';
-                        return (
-                          <div key={i} className={`w-7 h-7 rounded-full ${cls} flex items-center justify-center`}>
-                            {w && <span className="text-white font-bold" style={{fontSize: '10px'}}>{w[0].toUpperCase()}</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Actions */}
-                    {!matchDone ? (
-                      <div className="border-t border-white/10 flex">
-                        <button onClick={() => win(p1, p2, p1)} className="flex-1 py-3 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border-l border-white/10">
-                          <span className={`w-4 h-4 rounded-full ${getColorClass(players, p1)} flex-shrink-0`} />
-                          {p1} ניצח
-                        </button>
-                        <button onClick={() => win(p1, p2, p2)} className="flex-1 py-3 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
-                          <span className={`w-4 h-4 rounded-full ${getColorClass(players, p2)} flex-shrink-0`} />
-                          {p2} ניצח
-                        </button>
-                        {games.length > 0 && (
-                          <button onClick={() => undo(p1, p2)} className="border-r border-white/10 px-4 text-slate-500 hover:text-white transition-colors text-lg" title="בטל אחרון">↩</button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="border-t border-white/10 px-4 py-2.5 flex items-center justify-between">
-                        <span className="text-slate-400 text-xs">הסתיים ✓</span>
-                        <span className="text-slate-300 text-sm font-bold">
-                          <span className={p1w > p2w ? 'text-emerald-400' : 'text-slate-500'}>{p1}</span>
-                          <span className="text-slate-600 mx-1.5">{p1w}:{p2w}</span>
-                          <span className={p2w > p1w ? 'text-emerald-400' : 'text-slate-500'}>{p2}</span>
-                        </span>
-                        <button onClick={() => undo(p1, p2)} className="text-slate-600 hover:text-slate-400 transition-colors text-base" title="בטל אחרון">↩</button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="h-12" />
-          </div>
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+// Init
+if(S.phase==='playing') renderGame(); else renderSetup();
+</script>
 </body>
 </html>
