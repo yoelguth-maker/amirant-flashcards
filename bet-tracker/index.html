@@ -5,171 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🎯 התערבות בין חברים</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e0a3c 50%, #0f172a 100%);
-      min-height: 100vh;
-      color: #fff;
-      direction: rtl;
-    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e0a3c 50%,#0f172a 100%);min-height:100vh;color:#fff;direction:rtl}
+    .wrap{max-width:500px;margin:0 auto;padding:20px}
 
-    .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+    /* ── SETUP ── */
+    #setup{padding-top:36px}
+    .logo{text-align:center;margin-bottom:28px}
+    .logo .em{font-size:54px}
+    .logo h1{font-size:25px;font-weight:900;margin-top:6px}
+    .logo p{color:#94a3b8;font-size:13px;margin-top:3px}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;margin-bottom:12px}
+    .card-label{font-size:13px;font-weight:700;margin-bottom:10px;color:#e2e8f0;display:block}
+    textarea,input[type=text]{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 13px;color:#fff;font-size:14px;font-family:inherit;outline:none;direction:rtl}
+    textarea{resize:none}
+    textarea:focus,input:focus{border-color:#a855f7}
+    .player-row{display:flex;gap:8px;margin-bottom:10px}
+    .player-row input{flex:1}
+    .btn-add{background:#7c3aed;border:none;border-radius:12px;color:#fff;font-size:22px;width:44px;cursor:pointer;transition:background .2s}
+    .btn-add:hover{background:#6d28d9}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{display:flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;color:#fff}
+    .chip button{background:none;border:none;color:#fff;cursor:pointer;font-size:16px;opacity:.8}
+    .chip button:hover{opacity:1}
+    .counter-row{display:flex;align-items:center;gap:16px}
+    .btn-count{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:22px;cursor:pointer;transition:background .2s}
+    .btn-count:hover{background:rgba(255,255,255,.2)}
+    .count-num{font-size:38px;font-weight:900;width:50px;text-align:center}
+    .count-info{color:#94a3b8;font-size:12px;margin-top:8px}
+    .btn-start{width:100%;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;border-radius:16px;color:#fff;font-size:18px;font-weight:900;padding:15px;cursor:pointer;margin-top:4px;font-family:inherit}
+    .btn-start:disabled{opacity:.4;cursor:not-allowed}
+    .hint{text-align:center;color:#64748b;font-size:12px;margin-top:8px}
 
-    #setup { padding-top: 40px; }
-    .logo { text-align: center; margin-bottom: 30px; }
-    .logo .emoji { font-size: 56px; }
-    .logo h1 { font-size: 26px; font-weight: 900; margin-top: 8px; }
-    .logo p { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+    /* ── PLAYING ── */
+    #playing{padding-top:20px;display:none}
+    .top-bar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+    .top-bar h2{font-size:17px;font-weight:900;line-height:1.4;max-width:85%}
+    .top-bar small{color:#94a3b8;font-size:11px;display:block;margin-top:3px}
+    .btn-reset{background:none;border:none;color:#64748b;font-size:22px;cursor:pointer}
+    .btn-reset:hover{color:#ef4444}
 
-    .card {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 14px;
-    }
-    .card label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: #e2e8f0;
-    }
-    textarea, input[type=text] {
-      width: 100%;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      padding: 12px 14px;
-      color: #fff;
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      direction: rtl;
-    }
-    textarea { resize: none; }
-    textarea:focus, input[type=text]:focus { border-color: #a855f7; }
+    /* Progress */
+    .prog-wrap{margin-bottom:18px}
+    .prog-labels{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:5px}
+    .prog-bar{height:8px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+    .prog-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#db2777);border-radius:99px;transition:width .4s}
 
-    .player-row { display: flex; gap: 8px; margin-bottom: 10px; }
-    .player-row input { flex: 1; }
-    .btn-add {
-      background: #7c3aed; border: none; border-radius: 12px;
-      color: #fff; font-size: 22px; width: 44px; cursor: pointer;
-    }
-    .btn-add:hover { background: #6d28d9; }
+    /* Big add button */
+    .btn-add-game{width:100%;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;border-radius:16px;color:#fff;font-size:17px;font-weight:900;padding:15px;cursor:pointer;margin-bottom:16px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-add-game:hover{opacity:.9}
 
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      display: flex; align-items: center; gap: 6px;
-      border-radius: 999px; padding: 4px 12px;
-      font-size: 13px; font-weight: 600; color: #fff;
-    }
-    .chip button { background: none; border: none; color: #fff; cursor: pointer; font-size: 16px; opacity: 0.8; }
-    .chip button:hover { opacity: 1; }
+    /* Standings */
+    .standings{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;margin-bottom:14px;overflow:hidden}
+    .standings-title{padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;font-weight:700}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{color:#64748b;font-size:11px;padding:7px 14px;text-align:right;font-weight:600}
+    th.c,td.c{text-align:center}
+    tr+tr td{border-top:1px solid rgba(255,255,255,.05)}
+    td{padding:9px 14px}
+    .tr-top{background:rgba(234,179,8,.05)}
+    .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;vertical-align:middle;margin-left:8px}
+    .pts{color:#a78bfa;font-weight:700;font-size:15px}
+    .wins-td{color:#34d399;font-size:12px}
 
-    .counter-row { display: flex; align-items: center; gap: 16px; }
-    .btn-count {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(255,255,255,0.1); border: none;
-      color: #fff; font-size: 22px; cursor: pointer;
-    }
-    .btn-count:hover { background: rgba(255,255,255,0.2); }
-    .count-num { font-size: 38px; font-weight: 900; width: 50px; text-align: center; }
-    .count-info { color: #94a3b8; font-size: 12px; margin-top: 8px; }
+    /* Winner banner */
+    .winner-banner{background:linear-gradient(135deg,rgba(217,119,6,.3),rgba(234,88,12,.3));border:1px solid rgba(234,179,8,.4);border-radius:16px;padding:20px;text-align:center;margin-bottom:14px}
+    .winner-banner .trophy{font-size:46px;margin-bottom:5px}
+    .winner-banner h3{color:#fde68a;font-size:19px}
+    .winner-banner p{color:#fbbf24;font-size:13px;margin-top:3px}
 
-    .btn-start {
-      width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777);
-      border: none; border-radius: 16px; color: #fff;
-      font-size: 18px; font-weight: 900; padding: 16px; cursor: pointer;
-      margin-top: 4px; font-family: inherit;
-    }
-    .btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
-    .hint { text-align: center; color: #64748b; font-size: 12px; margin-top: 8px; }
+    /* Matchup summary cards */
+    .matchup-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .mc-players{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+    .mc-score{font-size:13px;color:#94a3b8;direction:ltr;white-space:nowrap}
+    .mc-left{font-size:11px;color:#64748b;white-space:nowrap}
+    .mc-done{color:#34d399;font-size:11px}
+    .av-sm{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;vertical-align:middle}
 
-    #playing { padding-top: 20px; display: none; }
+    /* ── WIZARD MODAL ── */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+    .modal{background:#1e1b4b;border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:24px 20px 32px;max-height:90vh;overflow-y:auto}
+    .modal-title{font-size:17px;font-weight:900;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+    .btn-close{background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;line-height:1}
+    .btn-close:hover{color:#fff}
 
-    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-    .top-bar h2 { font-size: 17px; font-weight: 900; max-width: 85%; line-height: 1.4; }
-    .top-bar small { color: #94a3b8; font-size: 11px; display: block; margin-top: 3px; }
-    .btn-reset { background: none; border: none; color: #64748b; font-size: 22px; cursor: pointer; }
-    .btn-reset:hover { color: #ef4444; }
+    /* Step 1: matchup list */
+    .mu-btn{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:#fff;padding:14px 16px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-family:inherit;transition:background .15s}
+    .mu-btn:hover:not(:disabled){background:rgba(255,255,255,.12)}
+    .mu-btn:disabled{opacity:.35;cursor:not-allowed}
+    .mu-btn .left-side{display:flex;align-items:center;gap:8px}
+    .remaining{font-size:12px;font-weight:600;color:#94a3b8;background:rgba(255,255,255,.08);padding:3px 9px;border-radius:99px}
+    .remaining.zero{color:#4ade80}
 
-    .progress-wrap { margin-bottom: 20px; }
-    .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
-    .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #db2777); border-radius: 99px; transition: width 0.4s; }
+    /* Step 2: winner */
+    .step2-header{font-size:13px;color:#94a3b8;margin-bottom:14px;text-align:center}
+    .winner-btns{display:flex;gap:10px;margin-bottom:0}
+    .btn-winner{flex:1;border:2px solid rgba(255,255,255,.15);border-radius:16px;background:rgba(255,255,255,.06);color:#fff;padding:20px 10px;cursor:pointer;font-size:15px;font-weight:900;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:10px;transition:all .15s}
+    .btn-winner:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
+    .btn-winner.selected{border-color:#a855f7;background:rgba(168,85,247,.15)}
+    .av-lg{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff}
 
-    .standings { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
-    .standings-title { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; font-weight: 700; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { color: #64748b; font-size: 11px; padding: 8px 14px; text-align: right; }
-    tr + tr td { border-top: 1px solid rgba(255,255,255,0.05); }
-    td { padding: 10px 14px; }
-    .winner-row { background: rgba(234,179,8,0.05); }
-    .avatar {
-      width: 28px; height: 28px; border-radius: 50%;
-      display: inline-flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 900; color: #fff; vertical-align: middle; margin-left: 8px;
-    }
-    .wins { color: #34d399; font-weight: 700; font-size: 15px; text-align: center; }
-    .losses { color: #f87171; font-weight: 700; font-size: 15px; text-align: center; }
+    /* Step 3: points */
+    .pts-section{margin-top:16px}
+    .pts-label{font-size:13px;color:#94a3b8;margin-bottom:10px;text-align:center}
+    .pts-btns{display:flex;gap:8px}
+    .btn-pts{flex:1;border:2px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.05);color:#fff;padding:14px 8px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s}
+    .btn-pts:hover{background:rgba(255,255,255,.1)}
+    .btn-pts.selected{border-color:#a855f7;background:rgba(168,85,247,.15)}
+    .pts-num{font-size:24px;font-weight:900;color:#a78bfa}
+    .pts-name{font-size:11px;color:#94a3b8;font-weight:600}
 
-    .winner-banner {
-      background: linear-gradient(135deg, rgba(217,119,6,0.3), rgba(234,88,12,0.3));
-      border: 1px solid rgba(234,179,8,0.4);
-      border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px;
-    }
-    .winner-banner .trophy { font-size: 48px; margin-bottom: 6px; }
-    .winner-banner h3 { color: #fde68a; font-size: 20px; }
-    .winner-banner p { color: #fbbf24; font-size: 13px; margin-top: 4px; }
+    /* Confirm */
+    .btn-confirm{width:100%;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:900;padding:15px;cursor:pointer;margin-top:18px;font-family:inherit}
+    .btn-confirm:disabled{opacity:.35;cursor:not-allowed}
+    .btn-back{width:100%;background:none;border:1px solid rgba(255,255,255,.1);border-radius:14px;color:#94a3b8;font-size:14px;padding:11px;cursor:pointer;margin-top:8px;font-family:inherit}
+    .btn-back:hover{color:#fff}
 
-    .matchup {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px; margin-bottom: 10px; overflow: hidden;
-    }
-    .matchup-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
-    .player-side { display: flex; align-items: center; gap: 8px; }
-    .player-side.rev { flex-direction: row-reverse; }
-    .player-name { font-weight: 700; font-size: 14px; }
-    .score-num { font-size: 22px; font-weight: 900; }
-    .sw { color: #34d399; } .sl { color: #f87171; } .st { color: #94a3b8; }
-    .vs { color: #475569; font-size: 11px; font-weight: 700; }
-
-    .dots { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; }
-    .dot {
-      width: 26px; height: 26px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 900; color: #fff;
-    }
-    .dot-empty { background: rgba(255,255,255,0.1); }
-
-    .matchup-actions { border-top: 1px solid rgba(255,255,255,0.08); display: flex; }
-    .btn-win {
-      flex: 1; padding: 12px 8px; background: none; border: none;
-      color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      font-family: inherit;
-    }
-    .btn-win:first-child { border-left: 1px solid rgba(255,255,255,0.08); }
-    .btn-win:hover { background: rgba(255,255,255,0.08); }
-    .dot-sm { width: 14px; height: 14px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .btn-undo {
-      border-right: 1px solid rgba(255,255,255,0.08);
-      background: none; border-top: none; border-bottom: none; border-left: none;
-      color: #64748b; padding: 12px 14px; cursor: pointer; font-size: 18px;
-    }
-    .btn-undo:hover { color: #fff; }
-
-    .done-bar {
-      border-top: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
-    }
-    .done-label { color: #94a3b8; font-size: 11px; }
-    .done-score { font-size: 13px; font-weight: 700; }
-    .done-undo { background: none; border: none; color: #475569; cursor: pointer; font-size: 16px; }
-    .done-undo:hover { color: #94a3b8; }
-
+    /* Colors */
     .c0{background:#3b82f6}.c1{background:#a855f7}.c2{background:#10b981}
     .c3{background:#f97316}.c4{background:#ec4899}.c5{background:#06b6d4}
     .c6{background:#eab308}.c7{background:#ef4444}
@@ -177,18 +129,19 @@
 </head>
 <body>
 
-<div id="setup" class="container">
+<!-- SETUP -->
+<div id="setup" class="wrap">
   <div class="logo">
-    <div class="emoji">🎯</div>
+    <div class="em">🎯</div>
     <h1>התערבות בין חברים</h1>
     <p>הגדר · שחק · נצח</p>
   </div>
   <div class="card">
-    <label>🏆 מה ההימור?</label>
+    <span class="card-label">🏆 מה ההימור?</span>
     <textarea id="goalInput" rows="2" placeholder="למשל: המפסיד שוטף את החדר"></textarea>
   </div>
   <div class="card">
-    <label>👥 משתתפים (<span id="playerCount">0</span>)</label>
+    <span class="card-label">👥 משתתפים (<span id="playerCount">0</span>)</span>
     <div class="player-row">
       <input type="text" id="playerInput" placeholder="שם שחקן..." />
       <button class="btn-add" id="addBtn">+</button>
@@ -196,7 +149,7 @@
     <div class="chips" id="chips"></div>
   </div>
   <div class="card">
-    <label>🎮 כמה משחקים כל אחד מול כל אחד?</label>
+    <span class="card-label">🎮 כמה משחקים כל אחד מול כל אחד?</span>
     <div class="counter-row">
       <button class="btn-count" id="gpmMinus">−</button>
       <div class="count-num" id="gpmDisplay">5</div>
@@ -208,7 +161,8 @@
   <div class="hint" id="startHint">צריך לפחות 2 שחקנים</div>
 </div>
 
-<div id="playing" class="container">
+<!-- PLAYING -->
+<div id="playing" class="wrap">
   <div class="top-bar">
     <div>
       <h2 id="goalDisplay"></h2>
@@ -216,224 +170,333 @@
     </div>
     <button class="btn-reset" id="resetBtn">↺</button>
   </div>
-  <div class="progress-wrap">
-    <div class="progress-labels">
-      <span id="progText"></span>
-      <span id="progPct"></span>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-wrap">
+    <div class="prog-labels"><span id="progText"></span><span id="progPct"></span></div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
   </div>
+
+  <button class="btn-add-game" id="openWizardBtn">+ הזן תוצאת משחק</button>
+
   <div class="standings">
     <div class="standings-title">🏆 טבלת דירוג</div>
     <table>
       <thead><tr>
-        <th style="width:36px">#</th><th>שחקן</th>
-        <th style="text-align:center">נצח</th><th style="text-align:center">הפסיד</th>
+        <th style="width:34px">#</th>
+        <th>שחקן</th>
+        <th class="c">נקודות</th>
+        <th class="c">ניצחונות</th>
       </tr></thead>
       <tbody id="standingsBody"></tbody>
     </table>
   </div>
+
   <div id="winnerBanner" style="display:none" class="winner-banner">
     <div class="trophy">🏆</div>
     <h3 id="winnerText"></h3>
     <p id="winnerSub"></p>
   </div>
+
   <div id="matchupList"></div>
 </div>
 
+<!-- WIZARD -->
+<div id="wizardOverlay" class="overlay" style="display:none" onclick="overlayClick(event)">
+  <div class="modal" id="wizardModal">
+
+    <!-- Step 1 -->
+    <div id="step1">
+      <div class="modal-title">
+        <span>📋 בחר עימות</span>
+        <button class="btn-close" onclick="closeWizard()">×</button>
+      </div>
+      <div id="matchupBtns"></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" style="display:none">
+      <div class="modal-title">
+        <span id="step2Title"></span>
+        <button class="btn-close" onclick="closeWizard()">×</button>
+      </div>
+      <div class="step2-header">מי ניצח?</div>
+      <div class="winner-btns">
+        <button class="btn-winner" id="btnP1" onclick="selectWinner(0)">
+          <div class="av-lg" id="avP1"></div>
+          <span id="nameP1"></span>
+        </button>
+        <button class="btn-winner" id="btnP2" onclick="selectWinner(1)">
+          <div class="av-lg" id="avP2"></div>
+          <span id="nameP2"></span>
+        </button>
+      </div>
+      <div class="pts-section">
+        <div class="pts-label">כמה נקודות?</div>
+        <div class="pts-btns">
+          <button class="btn-pts" id="pts1" onclick="selectPts(1)">
+            <span class="pts-num">1</span>
+            <span class="pts-name">רגיל</span>
+          </button>
+          <button class="btn-pts" id="pts2" onclick="selectPts(2)">
+            <span class="pts-num">2</span>
+            <span class="pts-name">מרס</span>
+          </button>
+          <button class="btn-pts" id="pts3" onclick="selectPts(3)">
+            <span class="pts-num">3</span>
+            <span class="pts-name">מרס טורקי</span>
+          </button>
+        </div>
+      </div>
+      <button class="btn-confirm" id="confirmBtn" onclick="confirmGame()" disabled>✓ אשר</button>
+      <button class="btn-back" onclick="goStep1()">← חזור</button>
+    </div>
+
+  </div>
+</div>
+
 <script>
-const COLORS = ['c0','c1','c2','c3','c4','c5','c6','c7'];
-const KEY = 'bet-tracker-v2';
+const COLORS=['c0','c1','c2','c3','c4','c5','c6','c7'];
+const KEY='bet-tracker-v3';
 
-let S = loadState();
+let S=load();
+// Wizard temp state
+let wiz={p1:null,p2:null,winner:null,pts:null};
 
-function loadState() {
-  try {
-    const d = JSON.parse(localStorage.getItem(KEY) || '{}');
-    return { phase: d.phase||'setup', goal: d.goal||'', players: d.players||[], gpm: d.gpm||5, results: d.results||{} };
-  } catch { return { phase:'setup', goal:'', players:[], gpm:5, results:{} }; }
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY)||'{}');
+    return{phase:d.phase||'setup',goal:d.goal||'',players:d.players||[],gpm:d.gpm||5,results:d.results||{}};
+  }catch{return{phase:'setup',goal:'',players:[],gpm:5,results:{}};}
 }
-function saveState() { localStorage.setItem(KEY, JSON.stringify(S)); }
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+function col(name){return COLORS[S.players.indexOf(name)%COLORS.length];}
+function av(name,sz){
+  sz=sz||28;
+  return`<span class="av ${col(name)}" style="width:${sz}px;height:${sz}px;font-size:${sz<20?9:sz<30?11:16}px">${name[0].toUpperCase()}</span>`;
+}
 
-function color(name) { return COLORS[S.players.indexOf(name) % COLORS.length]; }
-function avHtml(name) { return `<span class="avatar ${color(name)}">${name[0].toUpperCase()}</span>`; }
-
-function getMatchups() {
-  const m = [];
-  for (let i=0; i<S.players.length; i++)
-    for (let j=i+1; j<S.players.length; j++)
-      m.push([S.players[i], S.players[j]]);
+function matchups(){
+  const m=[];
+  for(let i=0;i<S.players.length;i++)
+    for(let j=i+1;j<S.players.length;j++)
+      m.push([S.players[i],S.players[j]]);
   return m;
 }
 
-function getStandings() {
-  const stats = {};
-  S.players.forEach(p => { stats[p] = {wins:0, losses:0}; });
-  getMatchups().forEach(([p1,p2]) => {
-    (S.results[p1+'__'+p2]||[]).forEach(w => {
-      if (w===p1){stats[p1].wins++;stats[p2].losses++;}
-      else if(w===p2){stats[p2].wins++;stats[p1].losses++;}
+function gamesPlayed(p1,p2){return(S.results[p1+'__'+p2]||[]).length;}
+function remaining(p1,p2){return S.gpm-gamesPlayed(p1,p2);}
+
+function standings(){
+  const stats={};
+  S.players.forEach(p=>{stats[p]={pts:0,wins:0};});
+  matchups().forEach(([p1,p2])=>{
+    (S.results[p1+'__'+p2]||[]).forEach(g=>{
+      stats[g.w].pts+=g.p;
+      stats[g.w].wins++;
     });
   });
-  return S.players.map(p=>({name:p,...stats[p]})).sort((a,b)=>b.wins-a.wins||a.losses-b.losses);
+  return S.players.map(p=>({name:p,...stats[p]})).sort((a,b)=>b.pts-a.pts||b.wins-a.wins);
 }
 
-function totalPlayed() { return Object.values(S.results).reduce((s,g)=>s+g.length,0); }
+function totalPlayed(){return Object.values(S.results).reduce((s,g)=>s+g.length,0);}
+function totalGames(){return matchups().length*S.gpm;}
 
-// ── Wire up static buttons ──
-document.getElementById('addBtn').onclick = addPlayer;
-document.getElementById('playerInput').onkeydown = e => { if(e.key==='Enter') addPlayer(); };
-document.getElementById('gpmMinus').onclick = () => changeGpm(-1);
-document.getElementById('gpmPlus').onclick  = () => changeGpm(1);
-document.getElementById('startBtn').onclick = startGame;
-document.getElementById('resetBtn').onclick = resetGame;
-document.getElementById('goalInput').oninput = e => { S.goal=e.target.value; saveState(); updateSetupMeta(); };
+// ── SETUP ──
+document.getElementById('addBtn').onclick=addPlayer;
+document.getElementById('playerInput').onkeydown=e=>{if(e.key==='Enter')addPlayer();};
+document.getElementById('gpmMinus').onclick=()=>changeGpm(-1);
+document.getElementById('gpmPlus').onclick=()=>changeGpm(1);
+document.getElementById('startBtn').onclick=startGame;
+document.getElementById('resetBtn').onclick=resetGame;
+document.getElementById('goalInput').oninput=e=>{S.goal=e.target.value;save();updateMeta();};
+document.getElementById('openWizardBtn').onclick=openWizard;
 
-function addPlayer() {
-  const inp = document.getElementById('playerInput');
-  const name = inp.value.trim();
-  if (name && !S.players.includes(name)) {
-    S.players.push(name); inp.value=''; saveState(); renderChips(); updateSetupMeta();
-  }
+function addPlayer(){
+  const inp=document.getElementById('playerInput');
+  const name=inp.value.trim();
+  if(name&&!S.players.includes(name)){S.players.push(name);inp.value='';save();renderChips();updateMeta();}
   inp.focus();
 }
+function removePlayer(name){S.players=S.players.filter(p=>p!==name);save();renderChips();updateMeta();}
+function changeGpm(d){S.gpm=Math.max(1,Math.min(20,S.gpm+d));document.getElementById('gpmDisplay').textContent=S.gpm;save();updateMeta();}
 
-function removePlayer(name) {
-  S.players = S.players.filter(p=>p!==name); saveState(); renderChips(); updateSetupMeta();
-}
-
-function changeGpm(d) {
-  S.gpm = Math.max(1, Math.min(20, S.gpm+d));
-  document.getElementById('gpmDisplay').textContent = S.gpm;
-  saveState(); updateSetupMeta();
-}
-
-function renderChips() {
-  document.getElementById('playerCount').textContent = S.players.length;
-  document.getElementById('chips').innerHTML = S.players.map((p,i) =>
-    `<span class="chip ${COLORS[i%COLORS.length]}">${p} <button onclick="removePlayer('${escQ(p)}')">×</button></span>`
+function renderChips(){
+  document.getElementById('playerCount').textContent=S.players.length;
+  document.getElementById('chips').innerHTML=S.players.map((p,i)=>
+    `<span class="chip ${COLORS[i%COLORS.length]}">${p}<button onclick="removePlayer('${esc(p)}')">×</button></span>`
   ).join('');
 }
 
-function updateSetupMeta() {
-  const m = getMatchups();
-  const info = S.players.length>=2 ? `${m.length} עימותים × ${S.gpm} משחקים = ${m.length*S.gpm} בסה"כ` : '';
-  document.getElementById('countInfo').textContent = info;
-  const ok = S.players.length>=2 && S.goal.trim();
-  document.getElementById('startBtn').disabled = !ok;
-  const hint = document.getElementById('startHint');
-  hint.style.display = ok ? 'none' : '';
-  hint.textContent = !S.goal.trim() ? 'חסר תיאור הימור' : 'צריך לפחות 2 שחקנים';
+function updateMeta(){
+  const m=matchups();
+  document.getElementById('countInfo').textContent=S.players.length>=2
+    ?`${m.length} עימותים × ${S.gpm} משחקים = ${m.length*S.gpm} בסה"כ`:'';
+  const ok=S.players.length>=2&&S.goal.trim();
+  document.getElementById('startBtn').disabled=!ok;
+  const hint=document.getElementById('startHint');
+  hint.style.display=ok?'none':'';
+  hint.textContent=!S.goal.trim()?'חסר תיאור הימור':'צריך לפחות 2 שחקנים';
 }
 
-function escQ(s) { return s.replace(/'/g,"\\'"); }
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
-function startGame() {
-  S.phase='playing'; S.results={}; saveState(); renderGame();
+// ── GAME ──
+function startGame(){S.phase='playing';S.results={};save();renderGame();}
+
+function resetGame(){
+  if(!confirm('לאפס הכל?'))return;
+  S={phase:'setup',goal:'',players:[],gpm:5,results:{}};save();renderSetup();
 }
 
-function resetGame() {
-  if(!confirm('לאפס הכל?')) return;
-  S={phase:'setup',goal:'',players:[],gpm:5,results:{}}; saveState(); renderSetup();
-}
-
-function recordWin(p1,p2,winner) {
-  const key=p1+'__'+p2, cur=S.results[key]||[];
-  if(cur.length>=S.gpm) return;
-  S.results[key]=[...cur,winner]; saveState(); renderGame();
-}
-
-function undoLast(p1,p2) {
-  const key=p1+'__'+p2, cur=S.results[key]||[];
-  if(!cur.length) return;
-  S.results[key]=cur.slice(0,-1); saveState(); renderGame();
-}
-
-function renderSetup() {
+function renderSetup(){
   document.getElementById('setup').style.display='block';
   document.getElementById('playing').style.display='none';
   document.getElementById('goalInput').value=S.goal;
   document.getElementById('gpmDisplay').textContent=S.gpm;
-  renderChips(); updateSetupMeta();
+  renderChips();updateMeta();
 }
 
-function renderGame() {
+function renderGame(){
   document.getElementById('setup').style.display='none';
   document.getElementById('playing').style.display='block';
-
   document.getElementById('goalDisplay').textContent='🎯 '+S.goal;
   document.getElementById('metaDisplay').textContent=S.players.length+' שחקנים · '+S.gpm+' משחקים לכל עימות';
 
-  const played=totalPlayed(), m=getMatchups(), total=m.length*S.gpm;
-  const pct=total>0?Math.round(played/total*100):0;
+  const played=totalPlayed(),total=totalGames(),pct=total>0?Math.round(played/total*100):0;
   document.getElementById('progText').textContent=played+' / '+total+' משחקים';
   document.getElementById('progPct').textContent=pct+'%';
   document.getElementById('progFill').style.width=pct+'%';
 
-  const st=getStandings();
+  // Standings
+  const st=standings();
   document.getElementById('standingsBody').innerHTML=st.map((s,i)=>`
-    <tr class="${i===0&&s.wins>0?'winner-row':''}">
-      <td>${i===0&&s.wins>0?'👑':'<span style="color:#64748b;font-weight:700">'+(i+1)+'</span>'}</td>
-      <td>${avHtml(s.name)} ${s.name}</td>
-      <td class="wins">${s.wins}</td>
-      <td class="losses">${s.losses}</td>
+    <tr class="${i===0&&s.pts>0?'tr-top':''}">
+      <td>${i===0&&s.pts>0?'👑':'<span style="color:#64748b;font-weight:700">'+(i+1)+'</span>'}</td>
+      <td>${av(s.name)} ${s.name}</td>
+      <td class="c pts">${s.pts}</td>
+      <td class="c wins-td">${s.wins} נצ'</td>
     </tr>`).join('');
 
-  const isComplete=played===total&&total>0;
+  // Winner banner
+  const allDone=played===total&&total>0;
   const banner=document.getElementById('winnerBanner');
-  if(isComplete){
-    banner.style.display='';
+  if(allDone){
+    banner.style.display='block';
     document.getElementById('winnerText').textContent='הטורניר הסתיים!';
-    document.getElementById('winnerSub').textContent=st[0].name+' ניצח עם '+st[0].wins+' ניצחונות!';
-  } else { banner.style.display='none'; }
+    document.getElementById('winnerSub').textContent=st[0].name+' ניצח עם '+st[0].pts+' נקודות!';
+    document.getElementById('openWizardBtn').style.display='none';
+  }else{
+    banner.style.display='none';
+    document.getElementById('openWizardBtn').style.display='flex';
+  }
 
-  document.getElementById('matchupList').innerHTML=m.map(([p1,p2])=>{
-    const key=p1+'__'+p2, games=S.results[key]||[];
-    const p1w=games.filter(w=>w===p1).length, p2w=games.filter(w=>w===p2).length;
-    const done=games.length>=S.gpm;
-    const sc1=p1w>p2w?'sw':p1w<p2w?'sl':'st';
-    const sc2=p2w>p1w?'sw':p2w<p1w?'sl':'st';
+  // Matchup summary cards
+  document.getElementById('matchupList').innerHTML=matchups().map(([p1,p2])=>{
+    const games=S.results[p1+'__'+p2]||[];
+    const p1pts=games.filter(g=>g.w===p1).reduce((s,g)=>s+g.p,0);
+    const p2pts=games.filter(g=>g.w===p2).reduce((s,g)=>s+g.p,0);
+    const rem=S.gpm-games.length;
+    const done=rem===0;
 
-    const dots=Array.from({length:S.gpm}).map((_,i)=>{
-      const w=games[i];
-      return w?`<div class="dot ${color(w)}">${w[0].toUpperCase()}</div>`:`<div class="dot dot-empty"></div>`;
-    }).join('');
+    const gameHistory=games.map(g=>{
+      const label=g.p===1?'1':g.p===2?'מ':'מ"ט';
+      return`<span style="background:${done&&g.w===p1?'':''}rgba(255,255,255,.08);border-radius:6px;padding:2px 6px;font-size:11px;color:${g.w===p1?'#a78bfa':'#34d399'}">${g.w===p1?p1:p2} +${g.p}</span>`;
+    }).join(' ');
 
-    let actions;
-    if(done){
-      const n1=p1w>p2w?'sw':'sl', n2=p2w>p1w?'sw':'sl';
-      actions=`<div class="done-bar">
-        <span class="done-label">הסתיים ✓</span>
-        <span class="done-score"><span class="${n1}">${p1}</span> <span style="color:#475569">${p1w}:${p2w}</span> <span class="${n2}">${p2}</span></span>
-        <button class="done-undo" onclick="undoLast('${escQ(p1)}','${escQ(p2)}')">↩</button>
-      </div>`;
-    } else {
-      const undo=games.length>0?`<button class="btn-undo" onclick="undoLast('${escQ(p1)}','${escQ(p2)}')">↩</button>`:'';
-      actions=`<div class="matchup-actions">
-        <button class="btn-win" onclick="recordWin('${escQ(p1)}','${escQ(p2)}','${escQ(p1)}')">
-          <span class="dot-sm ${color(p1)}"></span>${p1} ניצח
-        </button>
-        <button class="btn-win" onclick="recordWin('${escQ(p1)}','${escQ(p2)}','${escQ(p2)}')">
-          <span class="dot-sm ${color(p2)}"></span>${p2} ניצח
-        </button>
-        ${undo}
-      </div>`;
-    }
-
-    return `<div class="matchup">
-      <div class="matchup-header">
-        <div class="player-side">${avHtml(p1)}<span class="player-name">${p1}</span><span class="score-num ${sc1}">${p1w}</span></div>
-        <span class="vs">vs</span>
-        <div class="player-side rev">${avHtml(p2)}<span class="player-name">${p2}</span><span class="score-num ${sc2}">${p2w}</span></div>
+    return`<div class="matchup-card">
+      <div style="flex:1;min-width:0">
+        <div class="mc-players">
+          ${av(p1,22)} ${p1}
+          <span style="color:#475569;font-size:11px">vs</span>
+          ${av(p2,22)} ${p2}
+        </div>
+        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${gameHistory}</div>
       </div>
-      <div class="dots">${dots}</div>
-      ${actions}
+      <div style="text-align:left;flex-shrink:0">
+        <div class="mc-score">${p1pts} : ${p2pts}</div>
+        <div class="${done?'mc-done':'mc-left'}">${done?'✓ הסתיים':'נשאר '+rem}</div>
+      </div>
     </div>`;
   }).join('');
 }
 
-// Init
-if(S.phase==='playing') renderGame(); else renderSetup();
+// ── WIZARD ──
+function openWizard(){
+  wiz={p1:null,p2:null,winner:null,pts:null};
+  goStep1();
+  document.getElementById('wizardOverlay').style.display='flex';
+}
+
+function closeWizard(){document.getElementById('wizardOverlay').style.display='none';}
+
+function overlayClick(e){if(e.target===document.getElementById('wizardOverlay'))closeWizard();}
+
+function goStep1(){
+  document.getElementById('step1').style.display='block';
+  document.getElementById('step2').style.display='none';
+  wiz.winner=null;wiz.pts=null;
+
+  document.getElementById('matchupBtns').innerHTML=matchups().map(([p1,p2])=>{
+    const rem=remaining(p1,p2);
+    const done=rem===0;
+    return`<button class="mu-btn" ${done?'disabled':''} onclick="selectMatchup('${esc(p1)}','${esc(p2)}')">
+      <div class="left-side">
+        ${av(p1,24)} ${p1}
+        <span style="color:#64748b;font-size:12px">נגד</span>
+        ${av(p2,24)} ${p2}
+      </div>
+      <span class="remaining ${done?'zero':''}">${done?'✓ הסתיים':'נשאר '+rem}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectMatchup(p1,p2){
+  wiz.p1=p1;wiz.p2=p2;wiz.winner=null;wiz.pts=null;
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  document.getElementById('step2Title').textContent=p1+' נגד '+p2;
+
+  // set avatars and names
+  document.getElementById('avP1').className='av-lg '+col(p1);
+  document.getElementById('avP1').textContent=p1[0].toUpperCase();
+  document.getElementById('nameP1').textContent=p1;
+  document.getElementById('avP2').className='av-lg '+col(p2);
+  document.getElementById('avP2').textContent=p2[0].toUpperCase();
+  document.getElementById('nameP2').textContent=p2;
+
+  document.getElementById('btnP1').classList.remove('selected');
+  document.getElementById('btnP2').classList.remove('selected');
+  [1,2,3].forEach(n=>document.getElementById('pts'+n).classList.remove('selected'));
+  document.getElementById('confirmBtn').disabled=true;
+}
+
+function selectWinner(idx){
+  wiz.winner=idx===0?wiz.p1:wiz.p2;
+  document.getElementById('btnP1').classList.toggle('selected',idx===0);
+  document.getElementById('btnP2').classList.toggle('selected',idx===1);
+  checkConfirm();
+}
+
+function selectPts(n){
+  wiz.pts=n;
+  [1,2,3].forEach(i=>document.getElementById('pts'+i).classList.toggle('selected',i===n));
+  checkConfirm();
+}
+
+function checkConfirm(){
+  document.getElementById('confirmBtn').disabled=!(wiz.winner&&wiz.pts);
+}
+
+function confirmGame(){
+  const key=wiz.p1+'__'+wiz.p2;
+  if(!S.results[key])S.results[key]=[];
+  S.results[key].push({w:wiz.winner,p:wiz.pts});
+  save();
+  closeWizard();
+  renderGame();
+}
+
+// ── INIT ──
+if(S.phase==='playing')renderGame();else renderSetup();
 </script>
 </body>
 </html>
