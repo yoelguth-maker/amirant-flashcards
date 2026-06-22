@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 התערבות בין חברים</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+    input, textarea, button { font-family: inherit; }
+    ::placeholder { color: #64748b; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    const STORAGE_KEY = 'friends-bet-tracker-v1';
+
+    const PLAYER_COLORS = [
+      'bg-blue-500', 'bg-purple-500', 'bg-emerald-500', 'bg-orange-500',
+      'bg-pink-500', 'bg-cyan-500', 'bg-yellow-500', 'bg-red-500',
+    ];
+
+    const COLOR_HEX = {
+      'bg-blue-500': '#3b82f6', 'bg-purple-500': '#a855f7',
+      'bg-emerald-500': '#10b981', 'bg-orange-500': '#f97316',
+      'bg-pink-500': '#ec4899', 'bg-cyan-500': '#06b6d4',
+      'bg-yellow-500': '#eab308', 'bg-red-500': '#ef4444',
+    };
+
+    function generateMatchups(players) {
+      const matchups = [];
+      for (let i = 0; i < players.length; i++)
+        for (let j = i + 1; j < players.length; j++)
+          matchups.push([players[i], players[j]]);
+      return matchups;
+    }
+
+    function computeStandings(players, matchups, results) {
+      const stats = {};
+      players.forEach(p => { stats[p] = { wins: 0, losses: 0 }; });
+      matchups.forEach(([p1, p2]) => {
+        const games = results[`${p1}__${p2}`] || [];
+        games.forEach(w => {
+          if (w === p1) { stats[p1].wins++; stats[p2].losses++; }
+          else if (w === p2) { stats[p2].wins++; stats[p1].losses++; }
+        });
+      });
+      return players
+        .map(p => ({ name: p, ...stats[p] }))
+        .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+    }
+
+    function getColorClass(players, name) {
+      return PLAYER_COLORS[players.indexOf(name) % PLAYER_COLORS.length];
+    }
+
+    function Avatar({ players, name, large }) {
+      const cls = getColorClass(players, name);
+      const sz = large ? 'w-10 h-10 text-base' : 'w-7 h-7 text-xs';
+      return (
+        <span className={`${cls} ${sz} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>
+          {name[0].toUpperCase()}
+        </span>
+      );
+    }
+
+    function App() {
+      const [phase, setPhase] = useState('setup');
+      const [goal, setGoal] = useState('');
+      const [players, setPlayers] = useState([]);
+      const [input, setInput] = useState('');
+      const [gpm, setGpm] = useState(5);
+      const [results, setResults] = useState({});
+
+      useEffect(() => {
+        try {
+          const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          if (d.phase) {
+            setPhase(d.phase);
+            setGoal(d.goal || '');
+            setPlayers(d.players || []);
+            setGpm(d.gpm || 5);
+            setResults(d.results || {});
+          }
+        } catch {}
+      }, []);
+
+      useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ phase, goal, players, gpm, results }));
+      }, [phase, goal, players, gpm, results]);
+
+      const matchups = useMemo(() => generateMatchups(players), [players]);
+      const standings = useMemo(() => computeStandings(players, matchups, results), [players, matchups, results]);
+
+      const played = Object.values(results).reduce((s, g) => s + g.length, 0);
+      const total = matchups.length * gpm;
+      const pct = total > 0 ? Math.round((played / total) * 100) : 0;
+      const done = phase === 'playing' && played === total;
+
+      function addPlayer(e) {
+        e?.preventDefault();
+        const name = input.trim();
+        if (name && !players.includes(name)) { setPlayers(p => [...p, name]); setInput(''); }
+      }
+
+      function start() {
+        if (players.length < 2 || !goal.trim()) return;
+        setPhase('playing');
+        setResults({});
+      }
+
+      function win(p1, p2, winner) {
+        const key = `${p1}__${p2}`;
+        setResults(prev => {
+          const cur = prev[key] || [];
+          if (cur.length >= gpm) return prev;
+          return { ...prev, [key]: [...cur, winner] };
+        });
+      }
+
+      function undo(p1, p2) {
+        const key = `${p1}__${p2}`;
+        setResults(prev => {
+          const cur = prev[key] || [];
+          if (!cur.length) return prev;
+          return { ...prev, [key]: cur.slice(0, -1) };
+        });
+      }
+
+      function reset() {
+        if (!window.confirm('לאפס הכל ולהתחיל מחדש?')) return;
+        setPhase('setup'); setGoal(''); setPlayers([]); setGpm(5); setResults({});
+      }
+
+      /* ─── SETUP ─── */
+      if (phase === 'setup') return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex items-start justify-center p-4 pt-10">
+          <div className="w-full max-w-md">
+
+            <div className="text-center mb-8">
+              <div className="text-6xl mb-3">🎯</div>
+              <h1 className="text-3xl font-extrabold text-white">התערבות בין חברים</h1>
+              <p className="text-slate-400 mt-1 text-sm">הגדר · שחק · נצח</p>
+            </div>
+
+            <div className="space-y-4">
+
+              {/* Goal */}
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                <div className="text-white font-semibold text-sm mb-2">🏆&nbsp; מה ההימור?</div>
+                <textarea
+                  value={goal}
+                  onChange={e => setGoal(e.target.value)}
+                  placeholder="למשל: המפסיד שוטף את החדר"
+                  rows={2}
+                  className="w-full bg-white/10 text-white rounded-xl px-4 py-3 text-sm resize-none outline-none border border-white/10 focus:border-purple-500"
+                />
+              </div>
+
+              {/* Players */}
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                <div className="text-white font-semibold text-sm mb-3">👥&nbsp; משתתפים ({players.length})</div>
+                <form onSubmit={addPlayer} className="flex gap-2 mb-3">
+                  <input
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="שם שחקן..."
+                    className="flex-1 bg-white/10 text-white rounded-xl px-4 py-2.5 text-sm outline-none border border-white/10 focus:border-purple-500"
+                  />
+                  <button type="submit" className="bg-purple-600 hover:bg-purple-500 text-white rounded-xl px-5 py-2.5 font-bold text-xl transition-colors">+</button>
+                </form>
+                {players.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {players.map((p, i) => (
+                      <span key={p} className={`${PLAYER_COLORS[i % PLAYER_COLORS.length]} text-white text-sm rounded-full px-3 py-1 flex items-center gap-1.5`}>
+                        {p}
+                        <button onClick={() => setPlayers(ps => ps.filter(x => x !== p))} className="font-bold hover:opacity-70">×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Games per matchup */}
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                <div className="text-white font-semibold text-sm mb-3">🎮&nbsp; כמה משחקים כל אחד מול כל אחד?</div>
+                <div className="flex items-center gap-5">
+                  <button onClick={() => setGpm(g => Math.max(1, g - 1))} className="w-11 h-11 rounded-full bg-white/10 text-white text-2xl font-bold hover:bg-white/20 transition-colors flex items-center justify-center">−</button>
+                  <span className="text-white text-4xl font-extrabold w-12 text-center">{gpm}</span>
+                  <button onClick={() => setGpm(g => Math.min(20, g + 1))} className="w-11 h-11 rounded-full bg-white/10 text-white text-2xl font-bold hover:bg-white/20 transition-colors flex items-center justify-center">+</button>
+                </div>
+                {players.length >= 2 && (
+                  <p className="text-slate-400 text-xs mt-3">
+                    {matchups.length} עימותים × {gpm} משחקים = סה"כ {matchups.length * gpm} משחקים
+                  </p>
+                )}
+              </div>
+
+              <button
+                onClick={start}
+                disabled={players.length < 2 || !goal.trim()}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl text-xl transition-all shadow-xl shadow-purple-900/50"
+              >
+                יאללה נתחיל! 🚀
+              </button>
+              {players.length < 2 && <p className="text-center text-slate-500 text-xs">צריך לפחות 2 שחקנים</p>}
+            </div>
+          </div>
+        </div>
+      );
+
+      /* ─── PLAYING ─── */
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 p-4">
+          <div className="max-w-2xl mx-auto">
+
+            {/* Header */}
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <h1 className="text-white font-extrabold text-xl leading-snug">🎯 {goal}</h1>
+                <p className="text-slate-400 text-xs mt-1">{players.length} שחקנים · {gpm} משחקים לכל עימות</p>
+              </div>
+              <button onClick={reset} title="אפס הכל" className="text-slate-500 hover:text-red-400 transition-colors text-2xl mt-1">↺</button>
+            </div>
+
+            {/* Progress */}
+            <div className="mb-6">
+              <div className="flex justify-between text-xs text-slate-400 mb-1.5">
+                <span>{played} / {total} משחקים</span>
+                <span>{pct}%</span>
+              </div>
+              <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500" style={{width: `${pct}%`}} />
+              </div>
+            </div>
+
+            {/* Standings */}
+            <div className="bg-white/5 rounded-2xl border border-white/10 mb-5 overflow-hidden">
+              <div className="px-4 py-3 border-b border-white/10">
+                <span className="text-white font-bold text-sm">🏆 טבלת דירוג</span>
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-slate-500 text-xs border-b border-white/5">
+                    <th className="text-right px-4 py-2 w-10">#</th>
+                    <th className="text-right px-4 py-2">שחקן</th>
+                    <th className="text-center px-3 py-2 text-emerald-600">נצח</th>
+                    <th className="text-center px-3 py-2 text-red-600">הפסיד</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {standings.map((s, i) => (
+                    <tr key={s.name} className={`border-t border-white/5 ${i === 0 && s.wins > 0 ? 'bg-yellow-500/5' : ''}`}>
+                      <td className="px-4 py-3 text-center">{i === 0 && s.wins > 0 ? <span className="text-lg">👑</span> : <span className="text-slate-500 font-bold">{i + 1}</span>}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <Avatar players={players} name={s.name} />
+                          <span className="text-white font-semibold">{s.name}</span>
+                        </div>
+                      </td>
+                      <td className="text-center px-3 py-3"><span className="text-emerald-400 font-bold text-base">{s.wins}</span></td>
+                      <td className="text-center px-3 py-3"><span className="text-red-400 font-bold text-base">{s.losses}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Winner banner */}
+            {done && (
+              <div className="bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border border-yellow-500/40 rounded-2xl p-5 mb-5 text-center">
+                <div className="text-5xl mb-2">🏆</div>
+                <p className="text-yellow-200 font-extrabold text-xl">הטורניר הסתיים!</p>
+                <p className="text-yellow-400 text-sm mt-1">{standings[0]?.name} ניצח עם {standings[0]?.wins} ניצחונות!</p>
+              </div>
+            )}
+
+            {/* Matchups */}
+            <div className="space-y-3">
+              {matchups.map(([p1, p2]) => {
+                const key = `${p1}__${p2}`;
+                const games = results[key] || [];
+                const p1w = games.filter(w => w === p1).length;
+                const p2w = games.filter(w => w === p2).length;
+                const matchDone = games.length >= gpm;
+
+                return (
+                  <div key={key} className={`bg-white/5 rounded-2xl border overflow-hidden ${matchDone ? 'border-white/20' : 'border-white/10'}`}>
+
+                    {/* Score header */}
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Avatar players={players} name={p1} />
+                        <span className="text-white font-bold">{p1}</span>
+                        <span className={`font-extrabold text-xl ${p1w > p2w ? 'text-emerald-400' : p1w < p2w ? 'text-red-400' : 'text-slate-400'}`}>{p1w}</span>
+                      </div>
+                      <span className="text-slate-600 text-xs font-bold">vs</span>
+                      <div className="flex items-center gap-2 flex-row-reverse">
+                        <Avatar players={players} name={p2} />
+                        <span className="text-white font-bold">{p2}</span>
+                        <span className={`font-extrabold text-xl ${p2w > p1w ? 'text-emerald-400' : p2w < p1w ? 'text-red-400' : 'text-slate-400'}`}>{p2w}</span>
+                      </div>
+                    </div>
+
+                    {/* Game dots */}
+                    <div className="px-4 pb-3 flex flex-wrap gap-2">
+                      {Array.from({ length: gpm }).map((_, i) => {
+                        const w = games[i];
+                        const cls = w ? getColorClass(players, w) : 'bg-white/10';
+                        return (
+                          <div key={i} className={`w-7 h-7 rounded-full ${cls} flex items-center justify-center`}>
+                            {w && <span className="text-white font-bold" style={{fontSize: '10px'}}>{w[0].toUpperCase()}</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Actions */}
+                    {!matchDone ? (
+                      <div className="border-t border-white/10 flex">
+                        <button onClick={() => win(p1, p2, p1)} className="flex-1 py-3 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors border-l border-white/10">
+                          <span className={`w-4 h-4 rounded-full ${getColorClass(players, p1)} flex-shrink-0`} />
+                          {p1} ניצח
+                        </button>
+                        <button onClick={() => win(p1, p2, p2)} className="flex-1 py-3 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors">
+                          <span className={`w-4 h-4 rounded-full ${getColorClass(players, p2)} flex-shrink-0`} />
+                          {p2} ניצח
+                        </button>
+                        {games.length > 0 && (
+                          <button onClick={() => undo(p1, p2)} className="border-r border-white/10 px-4 text-slate-500 hover:text-white transition-colors text-lg" title="בטל אחרון">↩</button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="border-t border-white/10 px-4 py-2.5 flex items-center justify-between">
+                        <span className="text-slate-400 text-xs">הסתיים ✓</span>
+                        <span className="text-slate-300 text-sm font-bold">
+                          <span className={p1w > p2w ? 'text-emerald-400' : 'text-slate-500'}>{p1}</span>
+                          <span className="text-slate-600 mx-1.5">{p1w}:{p2w}</span>
+                          <span className={p2w > p1w ? 'text-emerald-400' : 'text-slate-500'}>{p2}</span>
+                        </span>
+                        <button onClick={() => undo(p1, p2)} className="text-slate-600 hover:text-slate-400 transition-colors text-base" title="בטל אחרון">↩</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="h-12" />
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
