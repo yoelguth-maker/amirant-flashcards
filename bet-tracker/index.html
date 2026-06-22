@@ -350,7 +350,7 @@ function undoLast(p1,p2) {
 }
 
 function renderSetup() {
-  document.getElementById('setup').style.display='';
+  document.getElementById('setup').style.display='block';
   document.getElementById('playing').style.display='none';
   document.getElementById('goalInput').value=S.goal;
   document.getElementById('gpmDisplay').textContent=S.gpm;
@@ -359,7 +359,7 @@ function renderSetup() {
 
 function renderGame() {
   document.getElementById('setup').style.display='none';
-  document.getElementById('playing').style.display='';
+  document.getElementById('playing').style.display='block';
 
   document.getElementById('goalDisplay').textContent='🎯 '+S.goal;
   document.getElementById('metaDisplay').textContent=S.players.length+' שחקנים · '+S.gpm+' משחקים לכל עימות';
