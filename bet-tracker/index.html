@@ -550,9 +550,10 @@ function renderGame(){
     const hist=games.map((g,idx)=>{
       const lbl=g.p===1?'+1':g.p===2?'מרס':'מרס טורקי';
       const clr=g.w===p1?'#a78bfa':'#34d399';
-      const editBtn=isAdmin?`<button onclick="editGame('${esc(p1)}','${esc(p2)}',${idx})" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;line-height:1">✏️</button>`:'';
+      const editBtn=isAdmin?`<button onclick="editGame('${esc(p1)}','${esc(p2)}',${idx})" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;line-height:1" title="ערוך">✏️</button><button onclick="deleteGame('${esc(p1)}','${esc(p2)}',${idx})" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;line-height:1" title="מחק">🗑️</button>`:'';
       return`<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.07);border-radius:8px;padding:3px 7px;font-size:11px;color:${clr}">${g.w} ${lbl}${editBtn}</span>`;
     }).join('');
+    const quickBtn=isAdmin&&!done?`<button onclick="quickAdd('${esc(p1)}','${esc(p2)}')" style="width:100%;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:700;padding:8px;cursor:pointer;font-family:inherit;margin-top:2px">+ הזן תוצאה</button>`:'';
     return`<div class="matchup-card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div class="mc-players">
@@ -565,6 +566,7 @@ function renderGame(){
         <div class="${done?'mc-done':'mc-left'}">${done?'✓ הסתיים':'נשאר '+rem}</div>
       </div>
       ${games.length?`<div style="display:flex;flex-wrap:wrap;gap:4px">${hist}</div>`:''}
+      ${quickBtn}
     </div>`;
   }).join('');
 }
@@ -573,6 +575,18 @@ function renderGame(){
 function openWizard(){
   wiz={p1:null,p2:null,winner:null,pts:null,editMode:false,editIdx:-1};
   goWizS1(); document.getElementById('wizardOverlay').style.display='flex';
+}
+function quickAdd(p1,p2){
+  wiz={p1,p2,winner:null,pts:null,editMode:false,editIdx:-1};
+  selectMatchup(p1,p2);
+  document.getElementById('wizardOverlay').style.display='flex';
+}
+function deleteGame(p1,p2,idx){
+  if(!confirm('למחוק משחק זה?'))return;
+  const key=p1+'__'+p2;
+  C.results[key].splice(idx,1);
+  if(!C.results[key].length)delete C.results[key];
+  saveC(); renderGame();
 }
 document.getElementById('openWizardBtn').onclick=openWizard;
 
