@@ -397,32 +397,46 @@ function renderGame(){
     const rem=S.gpm-games.length;
     const done=rem===0;
 
-    const gameHistory=games.map(g=>{
-      const label=g.p===1?'1':g.p===2?'מ':'מ"ט';
-      return`<span style="background:${done&&g.w===p1?'':''}rgba(255,255,255,.08);border-radius:6px;padding:2px 6px;font-size:11px;color:${g.w===p1?'#a78bfa':'#34d399'}">${g.w===p1?p1:p2} +${g.p}</span>`;
-    }).join(' ');
+    const gameHistory=games.map((g,idx)=>{
+      const ptsLabel=g.p===1?'+1':g.p===2?'מרס':'מרס טורקי';
+      const clr=g.w===p1?'#a78bfa':'#34d399';
+      return`<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:8px;padding:3px 8px;font-size:11px;color:${clr}">
+        ${g.w} ${ptsLabel}
+        <button onclick="editGame('${esc(p1)}','${esc(p2)}',${idx})" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;line-height:1" title="ערוך">✏️</button>
+      </span>`;
+    }).join('');
 
-    return`<div class="matchup-card">
-      <div style="flex:1;min-width:0">
+    return`<div class="matchup-card" style="flex-direction:column;align-items:stretch;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
         <div class="mc-players">
           ${av(p1,22)} ${p1}
-          <span style="color:#475569;font-size:11px">vs</span>
+          <span style="color:#a78bfa;font-weight:900;font-size:16px">${p1pts}</span>
+          <span style="color:#475569;font-size:13px;font-weight:900">:</span>
+          <span style="color:#34d399;font-weight:900;font-size:16px">${p2pts}</span>
           ${av(p2,22)} ${p2}
         </div>
-        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${gameHistory}</div>
-      </div>
-      <div style="text-align:left;flex-shrink:0">
-        <div class="mc-score">${p1pts} : ${p2pts}</div>
         <div class="${done?'mc-done':'mc-left'}">${done?'✓ הסתיים':'נשאר '+rem}</div>
       </div>
+      ${games.length>0?`<div style="display:flex;flex-wrap:wrap;gap:4px">${gameHistory}</div>`:''}
     </div>`;
   }).join('');
 }
 
 // ── WIZARD ──
 function openWizard(){
-  wiz={p1:null,p2:null,winner:null,pts:null};
+  wiz={p1:null,p2:null,winner:null,pts:null,editMode:false,editIdx:-1};
   goStep1();
+  document.getElementById('wizardOverlay').style.display='flex';
+}
+
+function editGame(p1,p2,idx){
+  wiz={p1,p2,winner:null,pts:null,editMode:true,editIdx:idx};
+  const game=S.results[p1+'__'+p2][idx];
+  selectMatchup(p1,p2);
+  document.getElementById('step2Title').textContent='✏️ ערוך: '+p1+' נגד '+p2;
+  // pre-select current values
+  selectWinner(game.w===p1?0:1);
+  selectPts(game.p);
   document.getElementById('wizardOverlay').style.display='flex';
 }
 
@@ -489,7 +503,11 @@ function checkConfirm(){
 function confirmGame(){
   const key=wiz.p1+'__'+wiz.p2;
   if(!S.results[key])S.results[key]=[];
-  S.results[key].push({w:wiz.winner,p:wiz.pts});
+  if(wiz.editMode){
+    S.results[key][wiz.editIdx]={w:wiz.winner,p:wiz.pts};
+  }else{
+    S.results[key].push({w:wiz.winner,p:wiz.pts});
+  }
   save();
   closeWizard();
   renderGame();
