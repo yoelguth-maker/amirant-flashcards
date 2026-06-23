@@ -1,0 +1,13 @@
+{
+  "name": "התערבות בין חברים",
+  "short_name": "התערבות",
+  "description": "ניהול תחרויות בין חברים",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "../icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
